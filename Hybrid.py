@@ -355,7 +355,7 @@ class Hybrid(tk.Tk):
                             
                             if count % 4 == 0 and count > 0:
                                 nom = oth[1+(4*h)]
-                                open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i , nom=nom: open_project(user, ind, nom))
+                                open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i , nom=nom, user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n))
                                 open_button.grid(row = i, column = j, pady = (0, 20), )
                                 
                                 i += 1
@@ -368,7 +368,7 @@ class Hybrid(tk.Tk):
                         
                         if oth:
                             nom = oth[1+(4*h)]
-                            open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i, nom=nom: open_project(user, ind, nom))
+                            open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i, nom=nom, user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n))
                             open_button.grid(row = i, column = j, pady = (0, 20), )
                     
                         create_new_proj_btn = ttk_but(proj_frame, text = 'NEW', command = lambda ident=ident: create_new_proj(ident, name_val, pass_val) )
@@ -468,7 +468,7 @@ class Hybrid(tk.Tk):
                 messagebox.showerror('Too many characters', '{}'.format(r))
                 reset(window)
             
-        def add_new_row(user, ind, nom):
+        def add_new_row(user, ind, nom, user_n, pass_n):
             def upd_date(see):
                 if see == 1:
                     new_date_lab.config(state='normal', cursor='ibeam')
@@ -534,10 +534,10 @@ class Hybrid(tk.Tk):
             choice_upd_1.grid(row = 3, column = 2, padx=(100, 0), sticky='w')
             choice_upd_2.grid(row = 3, column = 2, sticky='e')
             
-            add_new_row_sub = ttk_but(add_row_wind, text = 'SUBMIT', command = lambda wind=add_row_wind, user=user, ind=ind: submit_added_tab(wind, new_date_ent, user, ind, nom))
+            add_new_row_sub = ttk_but(add_row_wind, text = 'SUBMIT', command = lambda wind=add_row_wind, user=user, ind=ind: submit_added_tab(wind, new_date_ent, user, ind, nom, user_n, pass_n) )
             add_new_row_sub.grid(row = 5, column = 0, padx=(35, 0), pady=(30, 0), sticky='w' )
             
-        def submit_added_tab(wind, widget, user, ind, nom):
+        def submit_added_tab(wind, widget, user, ind, nom, user_n, pass_n):
             
             try:
                 try:
@@ -599,7 +599,7 @@ class Hybrid(tk.Tk):
                             curs.close()
                             
                             reset(wind)
-                            open_project(user, ind, nom)
+                            open_project(user, ind, nom, user_n, pass_n)
                             
                 except ValueError as v:
                     messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(v))
@@ -613,7 +613,7 @@ class Hybrid(tk.Tk):
             finally:
                 reset(wind)
                 
-        def edit_row(ser, user, ind, nom):
+        def edit_row(ser, user, ind, nom, user_n, pass_n):
             
             edit_row_wind = tk.Toplevel()
             edit_row_wind.resizable(0,0)
@@ -651,10 +651,13 @@ class Hybrid(tk.Tk):
             # edit_row_runtime.grid(row = 2, column = 0, pady=(0, 35)) standard
             # edit_row_runtime_ent.grid(row = 2, column = 1, pady=(0, 35)) standard
                         
-            edit_row_sub = ttk_but(edit_row_wind, text = 'SUBMIT', command = lambda ser=ser, user=user, ind=ind, nom=nom, wind=edit_row_wind : submit_edit_row(ser, user, ind, nom, wind))
+            edit_row_sub = ttk_but(edit_row_wind, text = 'SUBMIT', command = lambda ser=ser, user=user, ind=ind, 
+                                   nom=nom, wind=edit_row_wind, user_n = user_n, pas = pass_n : 
+                                    submit_edit_row(ser, user, ind, nom, wind, user_n, pas) )
+            
             edit_row_sub.grid(row = 5, column = 0, padx=(35, 0), pady=(30, 0), sticky='w' )
             
-        def submit_edit_row(ser, user, ind, nom, wind):
+        def submit_edit_row(ser, user, ind, nom, wind, user_n, pass_n):
             try:
                 try:
                     quant_g = quant.get()
@@ -706,7 +709,7 @@ class Hybrid(tk.Tk):
                             curs.close()
                             
                             messagebox.showinfo('Success', "Row has successfully been edited!")
-                            open_project(user, ind, nom)
+                            open_project(user, ind, nom, user_n, pass_n)
                             
                 except ValueError as v:
                     messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(v))
@@ -744,7 +747,7 @@ class Hybrid(tk.Tk):
             except Exception as f:
                 messagebox.showerror('Error', '{}'.format(f))
             
-        def open_project(user, ind, proj_name):
+        def open_project(user, ind, proj_name, user_n = None, pass_n = None):
             destroy_children()
                         
             try:
@@ -804,7 +807,7 @@ class Hybrid(tk.Tk):
                         
                         for count, var in enumerate(results):
                             if count % 7 == 0 and count > 0:
-                                edit_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))]: edit_row(ser, user, ind, nom) )
+                                edit_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: edit_row(ser, user, ind, nom, user_n, pas) )
                                 edit_button.grid(row = i, column = j, pady = (0, 20), )
                                       
                                 list_of_tp.append(results[4+(7*(i-2))])
@@ -823,7 +826,7 @@ class Hybrid(tk.Tk):
                             sum_tp = sum(list_of_tp)
                             sum_ph = sum(list_of_ph)
                             
-                            open_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))]: edit_row(ser, user, ind, nom) )
+                            open_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: edit_row(ser, user, ind, nom, user_n, pas) )
                             open_button.grid(row = i, column = j, pady = (0, 20), )
                             
                             tk.Label(cont_frame, text='Total Load Required:', font=('Times New Roman', 25, 'bold')).grid(row = i+1, column=0, columnspan=4, sticky='e')
@@ -836,7 +839,7 @@ class Hybrid(tk.Tk):
                         
                         back_var.set(13)
                         
-                        add_row_btn = ttk_but(cont_frame, text = 'ADD ROW', command = lambda user=user, ind=ind, nom=proj_name: add_new_row(user, ind, nom))
+                        add_row_btn = ttk_but(cont_frame, text = 'ADD ROW', command = lambda user=user, ind=ind, nom=proj_name, user_n = user_n, pas = pass_n: add_new_row(user, ind, nom, user_n, pas))
                         add_row_btn.grid(row = i+1, column=j, pady = (40, 0))
                         
                         cap_lab = tk.Label(cont_frame, text="Capacity of Panels:  ", fg = 'brown', font=('Times New Roman', 18, 'bold') )
@@ -899,8 +902,9 @@ class Hybrid(tk.Tk):
                         #add file tab to menu bar
                         file_tab = tk.Menu(menu_bar, tearoff = 0)
                         menu_bar.add_cascade(label = 'File', menu = file_tab)
+                        print(user_n, pass_n)
                         
-                        file_tab.add_command(label ='Close Project', command = None)
+                        file_tab.add_command(label ='Close Project', command = lambda log_wind = show_res, user = user_n, pas = pass_n : login_proj(log_wind, user, pas) )
                         file_tab.add_command(label ='Import From Excel File', command = recover)
                         file_tab.add_command(label ='Export To Excel File', command = recover)
                         file_tab.add_command(label ='Sign Out', command = lambda: (destroy_children(), self.bring_children()) )
@@ -911,7 +915,7 @@ class Hybrid(tk.Tk):
                         edit_tab = tk.Menu(menu_bar, tearoff = 0)
                         menu_bar.add_cascade(label = 'Edit', menu = edit_tab)
                         
-                        edit_tab.add_command(label ='Add Row', command = lambda user=user, ind=ind, nom=proj_name: add_new_row(user, ind, nom) )
+                        edit_tab.add_command(label ='Add Row', command = lambda user=user, ind=ind, nom=proj_name, user_n = user_n, pas = pass_n: add_new_row(user, ind, nom, user_n, pas) )
                         
                         edit_tab.add_command(label ='Re-calibrate', command = lambda a=no_pan_lab, 
                                                         b=inc_wat_lab, c=inc_kva_lab, d=tot_wat_lab, sumey=sum_tp,
