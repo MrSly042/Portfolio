@@ -27,6 +27,7 @@ class Hybrid(tk.Tk):
         self.iconphoto(False, icon)
         self.wm_state('zoomed')
         
+        
         # Create the welcome window
         self.create_welcome_window()
         
@@ -373,7 +374,7 @@ class Hybrid(tk.Tk):
                         create_new_proj_btn = ttk_but(proj_frame, text = 'NEW', command = lambda ident=ident: create_new_proj(ident, name_val, pass_val) )
                         create_new_proj_btn.grid(row = i+1, column=j, padx = (150, 0), pady = (40, 0))
 
-                        sign_out_btn = ttk_but(proj_frame, text = 'SIGN OUT', command = lambda: (destroy_children(), self.bring_children()))
+                        sign_out_btn = ttk_but(proj_frame, text = 'SIGN OUT', command = lambda: (destroy_children(), self.bring_children()) )
                         sign_out_btn.grid(row = i+1, column = j+1, padx=(50, 0), pady = (40, 0))
                         
         def create_new_proj(ident, nom, passe):
@@ -745,6 +746,7 @@ class Hybrid(tk.Tk):
             
         def open_project(user, ind, proj_name):
             destroy_children()
+                        
             try:
                 with query.connect(
                     host = hostname,
@@ -891,6 +893,44 @@ class Hybrid(tk.Tk):
                         
                         recal_btn.grid(row=i+6, column=0, columnspan=3, pady=(50, 70), )
                         
+                        #creating menu bar
+                        menu_bar = tk.Menu(self)
+                        
+                        #add file tab to menu bar
+                        file_tab = tk.Menu(menu_bar, tearoff = 0)
+                        menu_bar.add_cascade(label = 'File', menu = file_tab)
+                        
+                        file_tab.add_command(label ='Close Project', command = None)
+                        file_tab.add_command(label ='Import From Excel File', command = recover)
+                        file_tab.add_command(label ='Export To Excel File', command = recover)
+                        file_tab.add_command(label ='Sign Out', command = lambda: (destroy_children(), self.bring_children()) )
+                        file_tab.add_separator()
+                        file_tab.add_command(label ='Exit', command = self.destroy)
+                        
+                        #add other tabs
+                        edit_tab = tk.Menu(menu_bar, tearoff = 0)
+                        menu_bar.add_cascade(label = 'Edit', menu = edit_tab)
+                        
+                        edit_tab.add_command(label ='Add Row', command = lambda user=user, ind=ind, nom=proj_name: add_new_row(user, ind, nom) )
+                        
+                        edit_tab.add_command(label ='Re-calibrate', command = lambda a=no_pan_lab, 
+                                                        b=inc_wat_lab, c=inc_kva_lab, d=tot_wat_lab, sumey=sum_tp,
+                                                        e=tot_load_lab, f=no_bat_lab, g=cco_lab: calib(sumey, a, b, c, d, e, f, g) )
+                        
+                        edit_tab.add_command(label ='', command = None)
+                        edit_tab.add_separator()
+                        
+                        help_tab = tk.Menu(menu_bar, tearoff = 0) 
+                        menu_bar.add_cascade(label ='Help', menu = help_tab)
+                        
+                        help_tab.add_command(label ='Help', command = recover)
+                        help_tab.add_command(label ='More Apps From Kryptech', command = recover)
+                        help_tab.add_separator()
+                        help_tab.add_command(label ='About Hybrid', command = recover)
+                        
+                        #display menu
+                        self.config(menu = menu_bar)
+                        
             except query.Error as r:
                 messagebox.showerror('Error', 'The following error was encountered while getting details:\n{}'.format(r))
         
@@ -905,7 +945,7 @@ class Hybrid(tk.Tk):
         create_user_btn.grid(row=0, column=1, padx=50, pady=50)
         
         recover_pass_btn = ttk_but(self, text="Recover Password", command=recover)
-        recover_pass_btn.grid(row=0, column=2, padx=50, pady=50)
+        recover_pass_btn.grid(row=0, column=2, padx=50, pady=50)        
         
         def clear_children():
             for widget in self.winfo_children():
