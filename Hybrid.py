@@ -540,6 +540,7 @@ class Hybrid(tk.Tk):
         def submit_added_tab(wind, widget, user, ind, nom, user_n, pass_n):
             
             try:
+                runtime_g = 0
                 try:
                     quant_g = quant.get()
                     power_g = power.get()
@@ -902,7 +903,6 @@ class Hybrid(tk.Tk):
                         #add file tab to menu bar
                         file_tab = tk.Menu(menu_bar, tearoff = 0)
                         menu_bar.add_cascade(label = 'File', menu = file_tab)
-                        print(user_n, pass_n)
                         
                         file_tab.add_command(label ='Close Project', command = lambda log_wind = show_res, user = user_n, pas = pass_n : login_proj(log_wind, user, pas) )
                         file_tab.add_command(label ='Import From Excel File', command = recover)
