@@ -358,6 +358,9 @@ class Hybrid(tk.Tk):
                                 open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i , nom=nom, user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n))
                                 open_button.grid(row = i, column = j, pady = (0, 20), )
                                 
+                                del_proj_btn = ttk_but(proj_frame, text = 'DELETE', command = recover)
+                                del_proj_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (45, 0) )
+                                
                                 i += 1
                                 j = 0
                                 h += 1
@@ -370,6 +373,9 @@ class Hybrid(tk.Tk):
                             nom = oth[1+(4*h)]
                             open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i, nom=nom, user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n))
                             open_button.grid(row = i, column = j, pady = (0, 20), )
+                            
+                            del_proj_btn = ttk_but(proj_frame, text = 'DELETE', command = recover)
+                            del_proj_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (45, 0) )
                     
                         create_new_proj_btn = ttk_but(proj_frame, text = 'NEW', command = lambda ident=ident: create_new_proj(ident, name_val, pass_val) )
                         create_new_proj_btn.grid(row = i+1, column=j, padx = (150, 0), pady = (40, 0))
@@ -540,7 +546,7 @@ class Hybrid(tk.Tk):
         def submit_added_tab(wind, widget, user, ind, nom, user_n, pass_n):
             
             try:
-                runtime_g = 0
+                runtime_g = 13
                 try:
                     quant_g = quant.get()
                     power_g = power.get()
@@ -592,7 +598,7 @@ class Hybrid(tk.Tk):
                                 if var == serial_g:
                                     raise ValueError("Value for Serial no. in existence")
                             
-                            val = (serial_g, equip_g, quant_g, power_g, total_pow, 13, pow_hr) #runtime_g for standard
+                            val = (serial_g, equip_g, quant_g, power_g, total_pow, runtime_g, pow_hr) #runtime_g for standard
                             adj_add = add_row.format(table_name = tab)
                             curs.execute(adj_add, val)
 
@@ -810,6 +816,9 @@ class Hybrid(tk.Tk):
                             if count % 7 == 0 and count > 0:
                                 edit_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: edit_row(ser, user, ind, nom, user_n, pas) )
                                 edit_button.grid(row = i, column = j, pady = (0, 20), )
+                                
+                                del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = recover)
+                                del_work_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (25, 20) )
                                       
                                 list_of_tp.append(results[4+(7*(i-2))])
                                 list_of_ph.append(results[6+(7*(i-2))])
@@ -829,6 +838,9 @@ class Hybrid(tk.Tk):
                             
                             open_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: edit_row(ser, user, ind, nom, user_n, pas) )
                             open_button.grid(row = i, column = j, pady = (0, 20), )
+                            
+                            del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = recover)
+                            del_work_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (25, 20) )
                             
                             tk.Label(cont_frame, text='Total Load Required:', font=('Times New Roman', 25, 'bold')).grid(row = i+1, column=0, columnspan=4, sticky='e')
                             tk.Label(cont_frame, text=(sum_tp), font=('Times New Roman', 25, 'bold') ).grid(row = i+1, column = 4, )
