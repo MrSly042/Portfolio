@@ -160,6 +160,16 @@ class Hybrid(tk.Tk):
                       power = %s, total_power = %s, run_time = %s, power_hour = %s
                       where serial_no = %s
                   """
+        
+        del_proj = """ DELETE FROM projects WHERE serial_no = %s and project_id = %s
+                  """
+        
+        del_sum = """ DROP TABLE {table_name}
+                   """
+                   
+        del_row = """ DELETE FROM {table_name} where serial_no = %s
+                  """
+        
         #save user data & count for limit
         global count
         count = 0
@@ -358,8 +368,10 @@ class Hybrid(tk.Tk):
                                 open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i , nom=nom, user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n))
                                 open_button.grid(row = i, column = j, pady = (0, 20), )
                                 
-                                del_proj_btn = ttk_but(proj_frame, text = 'DELETE', command = recover)
-                                del_proj_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (45, 0) )
+                                del_proj_btn = ttk_but(proj_frame, text = 'DELETE',
+                                                   command = lambda wind = frame_pro, 
+                                                   user = name_val, pass_n = pass_val, 
+                                                   ser = i, pro = user: del_proj_func(wind, user, pass_n, ser, pro) )
                                 
                                 i += 1
                                 j = 0
@@ -371,10 +383,16 @@ class Hybrid(tk.Tk):
                         
                         if oth:
                             nom = oth[1+(4*h)]
-                            open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i, nom=nom, user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n))
+                            open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i, nom=nom, 
+                                                  user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n) )
+                            
                             open_button.grid(row = i, column = j, pady = (0, 20), )
                             
-                            del_proj_btn = ttk_but(proj_frame, text = 'DELETE', command = recover)
+                            del_proj_btn = ttk_but(proj_frame, text = 'DELETE',
+                                                   command = lambda wind = frame_pro, 
+                                                   user = name_val, pass_n = pass_val, 
+                                                   ser = i, pro = ident: del_proj_func(wind, user, pass_n, ser, pro) )
+                            
                             del_proj_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (45, 0) )
                     
                         create_new_proj_btn = ttk_but(proj_frame, text = 'NEW', command = lambda ident=ident: create_new_proj(ident, name_val, pass_val) )
@@ -473,6 +491,33 @@ class Hybrid(tk.Tk):
             except Exception as r:
                 messagebox.showerror('Too many characters', '{}'.format(r))
                 reset(window)
+            
+        def del_proj_func(wind, user, pass_n, ser_no, pro_id):
+            try:
+
+                val = (ser_no, pro_id)
+                nom = 'sum_{}_{}'.format(pro_id, ser_no)
+                del_sum_new = del_sum.format(table_name = nom)
+                
+                with query.connect(
+                host = hostname,
+                user = username,
+                password = password,
+                database = database
+                ) as db:
+                    
+                    curs = db.cursor()
+                    curs.execute(del_proj, val)
+                    db.commit()
+                    
+                    curs.execute(del_sum_new)
+                    db.commit()
+                    curs.close()
+                
+                login_proj(wind, user, pass_n)
+                
+            except query.Error as e:
+                messagebox.showerror('The following error occurred: \n' '{}'.format(e))
             
         def add_new_row(user, ind, nom, user_n, pass_n):
             def upd_date(see):
