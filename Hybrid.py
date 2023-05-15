@@ -365,7 +365,10 @@ class Hybrid(tk.Tk):
                             
                             if count % 4 == 0 and count > 0:
                                 nom = oth[1+(4*h)]
-                                open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i , nom=nom, user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n))
+                                open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, 
+                                                      ind=i , nom=nom, user_n = name_val, pass_n = pass_val: 
+                                                      open_project(user, ind, nom, user_n, pass_n) )
+                                
                                 open_button.grid(row = i, column = j, pady = (0, 20), )
                                 
                                 del_proj_btn = ttk_but(proj_frame, text = 'DELETE',
@@ -517,7 +520,32 @@ class Hybrid(tk.Tk):
                 login_proj(wind, user, pass_n)
                 
             except query.Error as e:
-                messagebox.showerror('The following error occurred: \n' '{}'.format(e))
+                messagebox.showerror('The following error occurred: \n' '{}'.format(e) )
+        
+        def del_row_func(pro, ser_tab, ser_item, proj_name, user_n, pass_n):
+            try:
+                
+                # val = (ser)
+                nom = 'sum_{}_{}'.format(pro, ser_tab)
+                del_row_new = del_row.format(table_name = nom)
+                
+                with query.connect(
+                    host = hostname,
+                    user = username,
+                    password = password,
+                    database = database
+                ) as db:
+                    
+                    curs = db.cursor()
+                    curs.execute(del_row_new, ser_item)
+                    db.commit()
+                    
+                    curs.close()
+                
+                open_project(pro, ser_tab, proj_name, user_n, pass_n)
+            
+            except query.Error as f:
+                messagebox.showerror('The following error occurred: \n' '{}'.format(f) )
             
         def add_new_row(user, ind, nom, user_n, pass_n):
             def upd_date(see):
@@ -799,7 +827,7 @@ class Hybrid(tk.Tk):
             except Exception as f:
                 messagebox.showerror('Error', '{}'.format(f))
             
-        def open_project(user, ind, proj_name, user_n = None, pass_n = None):
+        def open_project(user, ind, proj_name, user_n, pass_n):
             destroy_children()
                         
             try:
@@ -859,10 +887,15 @@ class Hybrid(tk.Tk):
                         
                         for count, var in enumerate(results):
                             if count % 7 == 0 and count > 0:
-                                edit_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: edit_row(ser, user, ind, nom, user_n, pas) )
+                                edit_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))],
+                                                      user_n = user_n, pas = pass_n: edit_row(ser, user, ind, nom, user_n, pas) )
+                                
                                 edit_button.grid(row = i, column = j, pady = (0, 20), )
                                 
-                                del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = recover)
+                                del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, ser_item = results[0+(7*(i-2))], ser_tab = ind,
+                                                   pro_name = proj_name, use_name = user_n, pass_name = pass_n: del_row_func(pro, ser_tab, 
+                                                   ser_item, pro_name, use_name, pass_name) )
+                                
                                 del_work_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (25, 20) )
                                       
                                 list_of_tp.append(results[4+(7*(i-2))])
@@ -881,10 +914,16 @@ class Hybrid(tk.Tk):
                             sum_tp = sum(list_of_tp)
                             sum_ph = sum(list_of_ph)
                             
-                            open_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: edit_row(ser, user, ind, nom, user_n, pas) )
+                            open_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind = ind, 
+                                                  nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: 
+                                                  edit_row(ser, user, ind, nom, user_n, pas) )
+                            
                             open_button.grid(row = i, column = j, pady = (0, 20), )
                             
-                            del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = recover)
+                            del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, ser_item = results[0+(7*(i-2))], ser_tab = ind,
+                                                   pro_name = proj_name, use_name = user_n, pass_name = pass_n: del_row_func(pro, ser_tab, 
+                                                   ser_item, pro_name, use_name, pass_name) )
+                            
                             del_work_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (25, 20) )
                             
                             tk.Label(cont_frame, text='Total Load Required:', font=('Times New Roman', 25, 'bold')).grid(row = i+1, column=0, columnspan=4, sticky='e')
@@ -897,7 +936,9 @@ class Hybrid(tk.Tk):
                         
                         back_var.set(13)
                         
-                        add_row_btn = ttk_but(cont_frame, text = 'ADD ROW', command = lambda user=user, ind=ind, nom=proj_name, user_n = user_n, pas = pass_n: add_new_row(user, ind, nom, user_n, pas))
+                        add_row_btn = ttk_but(cont_frame, text = 'ADD ROW', command = lambda user=user, ind=ind, 
+                                              nom=proj_name, user_n = user_n, pas = pass_n: add_new_row(user, ind, nom, user_n, pas) )
+                        
                         add_row_btn.grid(row = i+1, column=j, pady = (40, 0))
                         
                         cap_lab = tk.Label(cont_frame, text="Capacity of Panels:  ", fg = 'brown', font=('Times New Roman', 18, 'bold') )
