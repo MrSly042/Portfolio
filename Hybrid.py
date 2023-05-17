@@ -27,7 +27,6 @@ class Hybrid(tk.Tk):
         self.iconphoto(False, icon)
         self.wm_state('zoomed')
         
-        
         # Create the welcome window
         self.create_welcome_window()
         
@@ -86,6 +85,10 @@ class Hybrid(tk.Tk):
                 
                 if x >= 0.9:
                     welcome.after(1500, welcome.destroy)
+                    
+                    for var in (welcome, sc_height, sc_width, img, wpercent, hsize, welcome_img, self.welcome_img):
+                        del var
+                        
                     break
                 
         welcome.after(200, banner)
@@ -525,7 +528,6 @@ class Hybrid(tk.Tk):
         def del_row_func(pro, ser_tab, ser_item, proj_name, user_n, pass_n):
             try:
                 
-                # val = (ser)
                 nom = 'sum_{}_{}'.format(pro, ser_tab)
                 del_row_new = del_row.format(table_name = nom)
                 
@@ -547,261 +549,86 @@ class Hybrid(tk.Tk):
             except query.Error as f:
                 messagebox.showerror('The following error occurred: \n' '{}'.format(f) )
             
-        def add_new_row(user, ind, nom, user_n, pass_n):
-            def upd_date(see):
-                if see == 1:
-                    new_date_lab.config(state='normal', cursor='ibeam')
-                    new_date_ent.config(state='normal', cursor='ibeam')
+        def add_new_row(cont_frame, user, ind, nom, user_n, pas, row, col, var = '' ):
+            
+            entry_var = tk.StringVar()
+            entry_var.set(var)
+            
+            key = f'pos_{row}_{col}'
+            entry_dict[key] = entry_var
+            
+            entry = tk.Entry(cont_frame, textvariable = entry_var, font=('comic sans ms', 10, 'bold'))
+            entry.grid(row = row, column = col, pady = (0, 10), )
+            
+            
+        def sub_new_row(ser, user, ind, nom, user_n, pass_n):
+            
+            print([var.get() for var in entry_dict.values()])
+            # try:
+            #     runtime_g = 13
+            #     try:
+            #         quant_g = quant.get()
+            #         power_g = power.get()
+            #         # runtime_g = runtime.get() standard
                 
-                else:
-                    new_date_lab.config(state='disabled', cursor='no')
-                    new_date_ent.config(state='disabled', cursor='no')
+            #     except tk.TclError:
+            #         quant_g, power_g, runtime_g = 0,0,0
                     
-            dec_var.set('2') #set the radiobtn to no 
-            
-            add_row_wind = tk.Toplevel()
-            add_row_wind.resizable(0,0)
-            add_row_wind.title("New Row")
-            add_row_wind.iconphoto(False, icon)
-            
-            add_row_wind.geometry('750x350')
-            self.attributes("-disabled", True)
-            add_row_wind.protocol("WM_DELETE_WINDOW", lambda: reset(add_row_wind))
-            
-            add_row_serial = tk.Label(add_row_wind, text='Serial No:', font=('Times New Roman', 12, ), )
-            add_row_equip = tk.Label(add_row_wind, text='Equipment:', font=('Times New Roman', 12, ), )
-            add_row_quant = tk.Label(add_row_wind, text='Quantity:', font=('Times New Roman', 12, ), )
-            
-            add_row_power = tk.Label(add_row_wind, text='Power:', font=('Times New Roman', 12, ), )
-            add_row_runtime = tk.Label(add_row_wind, text='Runtime:', font=('Times New Roman', 12, ), )
-            
-            add_row_serial_ent = tk.Entry(add_row_wind, textvariable=serial, font=('Times New Roman', 12, ), )
-            add_row_equip_ent = tk.Entry(add_row_wind, textvariable=equip, font=('Times New Roman', 12, ), )
-            add_row_quant_ent = tk.Entry(add_row_wind, textvariable=quant, font=('Times New Roman', 12, ), )
-            
-            add_row_power_ent = tk.Entry(add_row_wind, textvariable=power, font=('Times New Roman', 12, ), )
-            add_row_runtime_ent = tk.Entry(add_row_wind, textvariable=runtime, font=('Times New Roman', 12, ), )
-            
-            choice_upd_1 = tk.Radiobutton(add_row_wind, text="Yes", variable=dec_var, value='1', command = lambda see = 1: upd_date(see), font=('Times New Roman', 12, ))
-            choice_upd_2 = tk.Radiobutton(add_row_wind, text="No", variable=dec_var, value='2', command = lambda see = 2: upd_date(see), font=('Times New Roman', 12, ))
-            
-            add_row_serial.grid(row = 0, column = 0, pady=(0, 35), sticky = 'w')
-            add_row_serial_ent.grid(row = 0, column = 1,  pady=(0, 35))
-            add_row_equip.grid(row = 0, column = 2, pady=(0, 35), sticky = 'w', padx=(90, 0))
-            add_row_equip_ent.grid(row = 0, column = 3, pady=(0, 35), sticky = 'w')
-            add_row_quant.grid(row = 1, column = 0, pady=(0, 35), sticky = 'w')
-            
-            add_row_quant_ent.grid(row = 1, column = 1,  pady=(0, 35) )
-            add_row_power.grid(row = 1, column = 2, pady=(0, 35), sticky = 'w', padx=(90, 0))
-            add_row_power_ent.grid(row = 1, column = 3, pady=(0, 35), sticky = 'w')
-            
-            # add_row_runtime.grid(row = 2, column = 0, pady=(0, 35), sticky = 'w') standard
-            # add_row_runtime_ent.grid(row = 2, column = 1, pady=(0, 35)) standard
-            
-            ask_lab = tk.Label(add_row_wind, text = "Would you like to update this\nproject's date of completion?", font=('Times New Roman', 12, ))
-            ask_lab.grid(row = 2, column=2, sticky = 'w', padx=(85, 0), )
-            
-            new_date_lab = tk.Label(add_row_wind, text='Date Completed:', state='disabled', cursor='no', font=('Times New Roman', 12, ))
-            new_date_ent = tk.Entry(add_row_wind, textvariable=date, state='disabled', cursor='no', font=('Times New Roman', 12, ), )
-            
-            new_date_ent.bind("<Enter>", lambda event: self.show_tooltip(event, 1))
-            new_date_ent.bind("<Leave>", lambda event: self.show_tooltip(event, 0))
-            
-            new_date_lab.grid(row = 3, column=0, columnspan=2, sticky = 'w')
-            new_date_ent.grid(row=3, column=1, sticky = 'e')
-            
-            choice_upd_1.grid(row = 3, column = 2, padx=(100, 0), sticky='w')
-            choice_upd_2.grid(row = 3, column = 2, sticky='e')
-            
-            add_new_row_sub = ttk_but(add_row_wind, text = 'SUBMIT', command = lambda wind=add_row_wind, user=user, ind=ind: submit_added_tab(wind, new_date_ent, user, ind, nom, user_n, pass_n) )
-            add_new_row_sub.grid(row = 5, column = 0, padx=(35, 0), pady=(30, 0), sticky='w' )
-            
-        def submit_added_tab(wind, widget, user, ind, nom, user_n, pass_n):
-            
-            try:
-                runtime_g = 13
-                try:
-                    quant_g = quant.get()
-                    power_g = power.get()
-                    # runtime_g = runtime.get() standard
+            #     try:
+            #         serial_g = serial.get()
+            #     except tk.TclError:
+            #         raise Exception("Invalid value for Serial No.")
                 
-                except tk.TclError:
-                    quant_g, power_g, runtime_g = 0,0,0
-                    
-                try:
-                    serial_g = serial.get()
-                except tk.TclError:
-                    raise Exception("Invalid value for Serial No.")
+            #     equip_g = equip.get()
                 
-                equip_g = equip.get()
-                
-                if not equip_g:
-                    raise ValueError('Invalid values were entered for equipment')
+            #     if not equip_g:
+            #         raise ValueError('Invalid values were entered for equipment')
                                         
-                total_pow = power_g * quant_g
-                pow_hr = total_pow * runtime_g
+            #     total_pow = power_g * quant_g
+            #     pow_hr = total_pow * runtime_g
                     
-                try:
-                    with query.connect(
-                        host = hostname,
-                        user = username,
-                        password = password,
-                        database = database
+            #     try:
+            #         with query.connect(
+            #             host = hostname,
+            #             user = username,
+            #             password = password,
+            #             database = database
                     
-                        ) as db:
-                            curs = db.cursor()
+            #             ) as db:
+            #                 curs = db.cursor()
+                                    
+            #                 tab = 'sum_{0}_{1}'.format(user, ind)
+            #                 restrict_ser = row_serial.format(table_name = tab)
+            #                 curs.execute(restrict_ser)
                             
-                            if widget.cget("state") == "normal":
-                                b = date.get()
-                                
-                                if not b: b = None
-                                
-                                val = (b, user, ind)
-                                curs.execute(upd_date_comp, val)
-                                db.commit()
+            #                 get_out = curs.fetchall()
+            #                 new = [var for cont in get_out for var in cont]
                             
-                            tab = 'sum_{0}_{1}'.format(user, ind)
-                            restrict_ser = row_serial.format(table_name = tab)
-                            curs.execute(restrict_ser)
+            #                 for var in new:
+            #                     if var == serial_g and var != ser:
+            #                         raise ValueError("Value for Serial no. in existence")
                             
-                            get_out = curs.fetchall()
-                            new = [var for cont in get_out for var in cont]
-                            
-                            for var in new:
-                                if var == serial_g:
-                                    raise ValueError("Value for Serial no. in existence")
-                            
-                            val = (serial_g, equip_g, quant_g, power_g, total_pow, runtime_g, pow_hr) #runtime_g for standard
-                            adj_add = add_row.format(table_name = tab)
-                            curs.execute(adj_add, val)
+            #                 val = (serial_g, equip_g, quant_g, power_g, total_pow, runtime_g, pow_hr) #runtime_g for standard
+            #                 adj_add = add_row.format(table_name = tab)
+            #                 curs.execute(adj_add, val)
 
-                            db.commit()                    
-                            curs.close()
+            #                 db.commit()                    
+            #                 curs.close()
                             
-                            reset(wind)
-                            open_project(user, ind, nom, user_n, pass_n)
+            #                 open_project(user, ind, nom, user_n, pass_n)
+            
                             
-                except ValueError as v:
-                    messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(v))
+            #     except ValueError as v:
+            #         messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(v))
                             
-                except query.Error as r:
-                    messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(r))
+            #     except query.Error as r:
+            #         messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(r))
             
-            except Exception as e:
-                messagebox.showerror('Error', 'The following error occurred:\n{}'.format(e))
+            # except Exception as e:
+            #     messagebox.showerror('Error', 'The following error occurred:\n{}'.format(e))
             
-            finally:
-                reset(wind)
-                
-        def edit_row(ser, user, ind, nom, user_n, pass_n):
-            
-            edit_row_wind = tk.Toplevel()
-            edit_row_wind.resizable(0,0)
-            edit_row_wind.title("Edit Row")
-            edit_row_wind.iconphoto(False, icon)
-            
-            edit_row_wind.geometry('700x300')
-            self.attributes("-disabled", True)
-            edit_row_wind.protocol("WM_DELETE_WINDOW", lambda: reset(edit_row_wind))
-            
-            edit_row_serial = tk.Label(edit_row_wind, text='Serial No:', font=('Times New Roman', 12, ), )
-            edit_row_equip = tk.Label(edit_row_wind, text='Equipment:', font=('Times New Roman', 12, ), )
-            edit_row_quant = tk.Label(edit_row_wind, text='Quantity:', font=('Times New Roman', 12, ), )
-            
-            edit_row_power = tk.Label(edit_row_wind, text='Power:', font=('Times New Roman', 12, ), )
-            # edit_row_runtime = tk.Label(edit_row_wind, text='Runtime:', font=('Times New Roman', 12, ), ) standard
-            
-            edit_row_serial_ent = tk.Entry(edit_row_wind, textvariable=serial, font=('Times New Roman', 12, ), )
-            edit_row_equip_ent = tk.Entry(edit_row_wind, textvariable=equip, font=('Times New Roman', 12, ), )
-            edit_row_quant_ent = tk.Entry(edit_row_wind, textvariable=quant, font=('Times New Roman', 12, ), )
-            
-            edit_row_power_ent = tk.Entry(edit_row_wind, textvariable=power, font=('Times New Roman', 12, ), )
-            # edit_row_runtime_ent = tk.Entry(edit_row_wind, textvariable=runtime, font=('Times New Roman', 12, ), ) standard
-                        
-            edit_row_serial.grid(row = 0, column = 0, pady=(0, 35))
-            edit_row_serial_ent.grid(row = 0, column = 1,  pady=(0, 35))
-            edit_row_equip.grid(row = 0, column = 2, pady=(0, 35), sticky = 'w', padx=(90, 0))
-            edit_row_equip_ent.grid(row = 0, column = 3, pady=(0, 35), sticky = 'w')
-            edit_row_quant.grid(row = 1, column = 0, pady=(0, 35))
-            
-            edit_row_quant_ent.grid(row = 1, column = 1,  pady=(0, 35) )
-            edit_row_power.grid(row = 1, column = 2, pady=(0, 35), sticky = 'w', padx=(90, 0))
-            edit_row_power_ent.grid(row = 1, column = 3, pady=(0, 35), sticky = 'w')
-            
-            # edit_row_runtime.grid(row = 2, column = 0, pady=(0, 35)) standard
-            # edit_row_runtime_ent.grid(row = 2, column = 1, pady=(0, 35)) standard
-                        
-            edit_row_sub = ttk_but(edit_row_wind, text = 'SUBMIT', command = lambda ser=ser, user=user, ind=ind, 
-                                   nom=nom, wind=edit_row_wind, user_n = user_n, pas = pass_n : 
-                                    submit_edit_row(ser, user, ind, nom, wind, user_n, pas) )
-            
-            edit_row_sub.grid(row = 5, column = 0, padx=(35, 0), pady=(30, 0), sticky='w' )
-            
-        def submit_edit_row(ser, user, ind, nom, wind, user_n, pass_n):
-            try:
-                try:
-                    quant_g = quant.get()
-                    power_g = power.get()
-                    # runtime_g = runtime.get() standard
-                except tk.TclError:
-                    quant_g, power_g, = 0,0 #runtime_g = 0s
-                
-                try:
-                    serial_g = serial.get()
-                except tk.TclError:
-                    raise Exception("Invalid value for Serial No.")
-                
-                equip_g = equip.get()
-                runtime_g = 13
-                
-                if not equip_g:
-                    raise ValueError('Invalid values were entered for equipment')
-                                        
-                total_pow = power_g * quant_g
-                pow_hr = total_pow * runtime_g
-                    
-                try:
-                    with query.connect(
-                        host = hostname,
-                        user = username,
-                        password = password,
-                        database = database
-                    
-                        ) as db:
-                            curs = db.cursor()
-                            
-                            tab = 'sum_{0}_{1}'.format(user, ind)
-                            restrict_ser = row_serial.format(table_name = tab)
-                            curs.execute(restrict_ser)
-                            
-                            get_out = curs.fetchall()
-                            new = [var for cont in get_out for var in cont]
-                            
-                            for var in new:
-                                if var == serial_g and var != ser:
-                                    raise ValueError("Value for Serial no. in existence")
-                            
-                            val = (serial_g, equip_g, quant_g, power_g, total_pow, runtime_g, pow_hr, ser)
-                            adj_edit = upd_row.format(table_name = tab)
-                            curs.execute(adj_edit, val)
-
-                            db.commit()                    
-                            curs.close()
-                            
-                            messagebox.showinfo('Success', "Row has successfully been edited!")
-                            open_project(user, ind, nom, user_n, pass_n)
-                            
-                except ValueError as v:
-                    messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(v))
-                            
-                except query.Error as r:
-                    messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(r))
-            
-            except Exception as e:
-                messagebox.showerror('Error', 'The following error occurred:\n{}'.format(e))
-            
-            finally:
-                reset(wind)
+            # finally:
+            #     reset(wind)
         
         def calib(sumey, a,b,c,d,e,f,g):
             try:
@@ -887,24 +714,53 @@ class Hybrid(tk.Tk):
                         
                         for count, var in enumerate(results):
                             if count % 7 == 0 and count > 0:
-                                edit_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind=ind, nom=proj_name, ser=results[0+(7*(i-2))],
-                                                      user_n = user_n, pas = pass_n: edit_row(ser, user, ind, nom, user_n, pas) )
+                                save_button = ttk_but(cont_frame, text = 'SAVE', command = lambda user=user, ind=ind, nom=proj_name, 
+                                                      ser=results[0+(7*(i-2))], user_n = user_n, 
+                                                      pas = pass_n: sub_new_row(ser, user, ind, nom, user_n, pas) )
                                 
-                                edit_button.grid(row = i, column = j, pady = (0, 20), )
+                                save_button.grid(row = i, column = j, pady = (0, 20), )
                                 
-                                del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, ser_item = results[0+(7*(i-2))], ser_tab = ind,
-                                                   pro_name = proj_name, use_name = user_n, pass_name = pass_n: del_row_func(pro, ser_tab, 
-                                                   ser_item, pro_name, use_name, pass_name) )
+                                del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, 
+                                                       ser_item = results[0+(7*(i-2))], ser_tab = ind, pro_name = proj_name, 
+                                                       use_name = user_n, pass_name = pass_n: del_row_func(pro, ser_tab, ser_item,
+                                                                                                           pro_name, use_name, pass_name) )
                                 
                                 del_work_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (25, 20) )
-                                      
+                                                                      
                                 list_of_tp.append(results[4+(7*(i-2))])
                                 list_of_ph.append(results[6+(7*(i-2))])
                                 i += 1
                                 j = 0
                             
-                            label = tk.Label(cont_frame, text = var, font=('comic sans ms', 10, 'bold'))
-                            label.grid(row = i, column = j, pady = (0, 10), )
+                            if j == 4:
+                                label = tk.Label(cont_frame, text = var, font=('comic sans ms', 10, 'bold'))
+                                label.grid(row = i, column = j, pady = (0, 10), )
+                                
+                                key = f'pos_{i}_{j}'
+                                entry_dict[key] = entry_var
+                                j += 1
+                                continue
+                            
+                            elif j == 5:
+                                label = tk.Label(cont_frame, text = var, font=('comic sans ms', 10, 'bold'))
+                                label.grid(row = i, column = j, pady = (0, 10), )
+                                                                
+                                key = f'pos_{i}_{j}'
+                                entry_dict[key] = entry_var
+                                j += 1
+                                continue
+                                
+                            elif j == 6:
+                                label = tk.Label(cont_frame, text = var, font=('comic sans ms', 10, 'bold'))
+                                label.grid(row = i, column = j, pady = (0, 10), )
+                                j += 1
+                                                                
+                                key = f'pos_{i}_{j}'
+                                entry_dict[key] = entry_var
+                                j += 1
+                                continue
+                                
+                            add_new_row(cont_frame, user, ind, proj_name, user_n, pass_n, i, j, var )
                             j += 1
                         
                         if results:
@@ -914,11 +770,11 @@ class Hybrid(tk.Tk):
                             sum_tp = sum(list_of_tp)
                             sum_ph = sum(list_of_ph)
                             
-                            open_button = ttk_but(cont_frame, text = 'EDIT', command = lambda user=user, ind = ind, 
+                            save_button = ttk_but(cont_frame, text = 'SAVE', command = lambda user=user, ind = ind, 
                                                   nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: 
-                                                  edit_row(ser, user, ind, nom, user_n, pas) )
+                                                  sub_new_row(ser, user, ind, nom, user_n, pas) )
                             
-                            open_button.grid(row = i, column = j, pady = (0, 20), )
+                            save_button.grid(row = i, column = j, pady = (0, 20), )
                             
                             del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, ser_item = results[0+(7*(i-2))], ser_tab = ind,
                                                    pro_name = proj_name, use_name = user_n, pass_name = pass_n: del_row_func(pro, ser_tab, 
@@ -936,8 +792,9 @@ class Hybrid(tk.Tk):
                         
                         back_var.set(13)
                         
-                        add_row_btn = ttk_but(cont_frame, text = 'ADD ROW', command = lambda user=user, ind=ind, 
-                                              nom=proj_name, user_n = user_n, pas = pass_n: add_new_row(user, ind, nom, user_n, pas) )
+                        add_row_btn = ttk_but(cont_frame, text = 'ADD ROW', command = lambda user=user, 
+                                              ind=ind, nom=proj_name, user_n = user_n, 
+                                              pas = pass_n, row = i, col = j: add_new_row(cont_frame, user, ind, nom, user_n, pas, row, col) )
                         
                         add_row_btn.grid(row = i+1, column=j, pady = (40, 0))
                         
@@ -1013,7 +870,8 @@ class Hybrid(tk.Tk):
                         edit_tab = tk.Menu(menu_bar, tearoff = 0)
                         menu_bar.add_cascade(label = 'Edit', menu = edit_tab)
                         
-                        edit_tab.add_command(label ='Add Row', command = lambda user=user, ind=ind, nom=proj_name, user_n = user_n, pas = pass_n: add_new_row(user, ind, nom, user_n, pas) )
+                        edit_tab.add_command(label ='Add Row', command = lambda user=user, ind=ind, nom=proj_name, user_n = user_n, 
+                                             pas = pass_n: add_new_row(cont_frame, user, ind, nom, user_n, pas, i, j) )
                         
                         edit_tab.add_command(label ='Re-calibrate', command = lambda a=no_pan_lab, 
                                                         b=inc_wat_lab, c=inc_kva_lab, d=tot_wat_lab, sumey=sum_tp,
@@ -1047,7 +905,9 @@ class Hybrid(tk.Tk):
         create_user_btn.grid(row=0, column=1, padx=50, pady=50)
         
         recover_pass_btn = ttk_but(self, text="Recover Password", command=recover)
-        recover_pass_btn.grid(row=0, column=2, padx=50, pady=50)        
+        recover_pass_btn.grid(row=0, column=2, padx=50, pady=50) 
+        
+        entry_dict = {}    
         
         def clear_children():
             for widget in self.winfo_children():
