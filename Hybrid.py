@@ -37,22 +37,19 @@ class Hybrid(tk.Tk):
         for widget in self.winfo_children():
             widget.grid()
     
-    def show_tooltip(self, event, a):
+    def show_tooltip(self, event):
         global tooltip
-        widget = event.widget
-        if widget.cget("state") == "disabled":
-            return
         
-        if a == 1:
+        if event.type == "7":
+                  
             tooltip = tk.Toplevel()
             tooltip.wm_overrideredirect(True)  # Hide window decorations
             tooltip.wm_geometry(f"+{event.x_root + 10}+{event.y_root + 10}")  # Position tooltip window
             tooltip_label = tk.Label(tooltip, text=" Enter date in format: 'yyyy-mm-dd' ", bg='cyan', fg='brown')
             tooltip_label.pack()
             tooltip.after(3000, tooltip.destroy)  # Hide tooltip after 3 seconds
-    
-        if a == 0:
-            tooltip.destroy()
+        
+        else: tooltip.destroy()
     
     def create_welcome_window(self):
         welcome = tk.Toplevel()
@@ -332,7 +329,7 @@ class Hybrid(tk.Tk):
                         if not get_output:
                             messagebox.showwarning("INCORRECT CREDENTIALS", "Username or Password is incorrect!")
                         else:
-                            
+                                                        
                             ident = (get_output[0][0])
                             
                             curs.execute(show_proj, ident)
@@ -447,11 +444,11 @@ class Hybrid(tk.Tk):
             create_proj_audit_ent = tk.Entry(create_proj_wind, textvariable=pass_w, font=('Times New Roman', 15, ))
             create_proj_complete_ent = tk.Entry(create_proj_wind, textvariable=confirm, font=('Times New Roman', 15, ))
             
-            create_proj_audit_ent.bind("<Enter>", lambda event: self.show_tooltip(event, 1))
-            create_proj_audit_ent.bind("<Leave>", lambda event: self.show_tooltip(event, 0))
+            create_proj_audit_ent.bind("<Enter>", self.show_tooltip)
+            create_proj_audit_ent.bind("<Leave>", self.show_tooltip)
             
-            create_proj_complete_ent.bind("<Enter>", lambda event: self.show_tooltip(event, 1))
-            create_proj_complete_ent.bind("<Leave>", lambda event: self.show_tooltip(event, 0))
+            create_proj_complete_ent.bind("<Enter>", self.show_tooltip)
+            create_proj_complete_ent.bind("<Leave>", self.show_tooltip)
             create_new_proj_sub = ttk_but(create_proj_wind, text = 'SUBMIT', command = lambda ident=ident: submit_new_proj(ident, nom, passe,create_proj_wind))
 
             create_proj_name_label.grid(row = 0, column = 0, sticky='w', pady=(10, 0))
@@ -688,6 +685,57 @@ class Hybrid(tk.Tk):
             except Exception as e:
                 messagebox.showerror('Error', f'The following error occurred:\n{e}')
         
+        def upd_date_form(pro, ser, nom, user_n, pass_n):
+            upd_wind = tk.Toplevel()
+            upd_wind.title("Update Date of Completion")
+            upd_wind.iconphoto(False, icon)
+            
+            upd_wind.geometry('400x170')
+            upd_wind.resizable(0, 0)
+            upd_wind.protocol("WM_DELETE_WINDOW", lambda: reset(upd_wind))
+            
+            self.attributes("-disabled", True)
+            
+            upd_wind_label = tk.Label(upd_wind, text="  Date: ", font=('Times New Roman', 15, ))
+            upd_wind_label.grid(row = 0, column = 0, pady=(15, 0) )
+            
+            upd_wind_ent = tk.Entry(upd_wind, textvariable=date, fg='brown', font=('Times New Roman', 15, ) )
+            upd_wind_ent.grid(row = 0, column = 1, pady=(15, 0) )
+            
+            upd_wind_ent.bind("<Enter>", self.show_tooltip)
+            upd_wind_ent.bind("<Leave>", self.show_tooltip)
+            
+            sub_btn = ttk_but(upd_wind, text = "SUBMIT", command = lambda wind = upd_wind, pro=pro, 
+                              ser=ser, nom=nom, user_n=user_n, pas=pass_n : update_date(wind, pro, ser, nom, user_n, pas))
+            
+            sub_btn.grid(row = 1, column = 0, pady = (20, 0) )
+        
+        def update_date(wind, pro, ser, nom, user_n, pass_n):
+            try:
+                ins = date.get()
+                reset(wind)
+                
+                if not ins:
+                    ins = None
+                
+                with query.connect(
+                    host = hostname,
+                    user = username,
+                    password = password,
+                    database = database
+                
+                    ) as db:
+                        curs = db.cursor()
+                        
+                        val = (ins, pro, ser)
+                        curs.execute(upd_date_comp, val)
+                        db.commit()                            
+                                                
+                        open_project(pro, ser, nom, user_n, pass_n)
+            
+            except query.Error as g:
+                messagebox.showerror("Error", f'The following error occurred: \{g}')
+                
         def calib(sumey, a,b,c,d,e,f,g):
             try:
                 if isv_vare.get() % 12 != 0 or isv_vare.get() < 12:
@@ -831,14 +879,19 @@ class Hybrid(tk.Tk):
                             j += 1
                         
                         if results:
+                            save_button = ttk_but(cont_frame, text = 'SAVE', command = lambda user=user, ind=ind, nom=proj_name, 
+                                                 user_n = user_n, pas = pass_n: sub_new_row( user, ind, nom, user_n, pas) )
+                        
+                            save_button.grid(row = i+1, column = j-2, pady = (100, 0), padx = (0, 25))
+                            
                             list_of_tp.append(results[4+(7*(i-2))])
                             list_of_ph.append(results[6+(7*(i-2))])
                             
                             sum_tp = sum(list_of_tp)
                             sum_ph = sum(list_of_ph)
                                                                                     
-                            del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, ser_item = results[0+(7*(i-2))], ser_tab = ind,
-                                                   pro_name = proj_name, use_name = user_n, 
+                            del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, ser_item = results[0+(7*(i-2))], 
+                                                   ser_tab = ind, pro_name = proj_name, use_name = user_n, 
                                                    pass_name = pass_n, row = i: del_row_func(pro, ser_tab,
                                                    ser_item, pro_name, use_name, pass_name, row) )
                             
@@ -853,11 +906,6 @@ class Hybrid(tk.Tk):
                             sum_ph = 0
                         
                         back_var.set(13)
-                        
-                        save_button = ttk_but(cont_frame, text = 'SAVE', command = lambda user=user, ind=ind, nom=proj_name, 
-                                              user_n = user_n, pas = pass_n: sub_new_row( user, ind, nom, user_n, pas) )
-                        
-                        save_button.grid(row = i+1, column = j-2, pady = (100, 0), padx = (0, 25))
                         
                         add_row_btn = ttk_but(cont_frame, text = 'ADD ROW', command = lambda user=user, 
                                               ind=ind, nom=proj_name, user_n = user_n, 
@@ -943,11 +991,15 @@ class Hybrid(tk.Tk):
                         edit_tab.add_command(label ='Re-calibrate', command = lambda a=no_pan_lab, 
                                                         b=inc_wat_lab, c=inc_kva_lab, d=tot_wat_lab, sumey=sum_tp,
                                                         e=tot_load_lab, f=no_bat_lab, g=cco_lab: calib(sumey, a, b, c, d, e, f, g) )
-                        edit_tab.add_separator()
                         
                         edit_tab.add_command(label ='Save Edits', command = lambda user=user, ind=ind, nom=proj_name, 
                                                                         user_n = user_n, pas = pass_n: 
                                                                             sub_new_row( user, ind, nom, user_n, pas) )
+                        
+                        edit_tab.add_separator()
+                        
+                        edit_tab.add_command(label ='Update Date of Completion', command = lambda pro=user, ser=ind, 
+                                             nom = proj_name, user_n=user_n, pas=pass_n: upd_date_form(pro, ser, nom, user_n, pas) )
                         
                         help_tab = tk.Menu(menu_bar, tearoff = 0) 
                         menu_bar.add_cascade(label ='Help', menu = help_tab)
