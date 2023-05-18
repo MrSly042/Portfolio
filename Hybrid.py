@@ -527,8 +527,11 @@ class Hybrid(tk.Tk):
             except query.Error as e:
                 messagebox.showerror('The following error occurred: \n' '{}'.format(e) )
         
-        def del_row_func(pro, ser_tab, ser_item, proj_name, user_n, pass_n):
+        def del_row_func(pro, ser_tab, ser_item, proj_name, user_n, pass_n, row):
             try:
+                
+                for i in range(7):
+                    entry_dict.pop(f'pos_{row}_{i}')
                 
                 nom = 'sum_{}_{}'.format(pro, ser_tab)
                 del_row_new = del_row.format(table_name = nom)
@@ -753,8 +756,8 @@ class Hybrid(tk.Tk):
                                                                 
                                 del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, 
                                                        ser_item = results[0+(7*(i-2))], ser_tab = ind, pro_name = proj_name, 
-                                                       use_name = user_n, pass_name = pass_n: del_row_func(pro, ser_tab, ser_item,
-                                                                                                           pro_name, use_name, pass_name) )
+                                                       use_name = user_n, pass_name = pass_n, row = i: del_row_func(pro, ser_tab, ser_item,
+                                                                                                        pro_name, use_name, pass_name, row) )
                                 
                                 del_work_btn.grid(row = i, column = j, pady = (0, 20), padx = (0, 20) )
                                                                       
@@ -797,7 +800,7 @@ class Hybrid(tk.Tk):
                                 label.grid(row = i, column = j, pady = (0, 10), )
                                 j += 1
                                                                 
-                                key = f'pos_{i}_{j}'
+                                key = f'pos_{i}_{j-1}'
                                 entry_var = tk.IntVar()
                                 entry_var.set(var)
                                 
@@ -816,8 +819,9 @@ class Hybrid(tk.Tk):
                             sum_ph = sum(list_of_ph)
                                                                                     
                             del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, ser_item = results[0+(7*(i-2))], ser_tab = ind,
-                                                   pro_name = proj_name, use_name = user_n, pass_name = pass_n: del_row_func(pro, ser_tab, 
-                                                   ser_item, pro_name, use_name, pass_name) )
+                                                   pro_name = proj_name, use_name = user_n, 
+                                                   pass_name = pass_n, row = i: del_row_func(pro, ser_tab,
+                                                   ser_item, pro_name, use_name, pass_name, row) )
                             
                             del_work_btn.grid(row = i, column = j, pady = (0, 20), padx = (0, 20) )
                             
