@@ -565,7 +565,7 @@ class Hybrid(tk.Tk):
             entry_dict[key] = entry_var
             
             entry = tk.Entry(cont_frame, textvariable = entry_var, font=('comic sans ms', 10, 'bold'))
-            entry.grid(row = row, column = col, pady = (0, 10), )
+            entry.grid(row = row, column = col, pady = (0, 10), padx = 20)
             
         def add_new_row(user, ind, nom, user_n, pass_n ):
 
@@ -744,24 +744,19 @@ class Hybrid(tk.Tk):
                         
                         for i, var in enumerate(headings):
                             label = tk.Label(cont_frame, text = var, font=('comic sans ms', 15, 'bold'))
-                            label.grid(row = 1, column = i, ipadx=45, pady= (0, 10), )
+                            label.grid(row = 1, column = i, padx=(0,45), pady= (0, 10), )
                             
                         i, j, ite = 2, 0, 0
                         
                         for count, var in enumerate(results):
                             if count % 7 == 0 and count > 0:
-                                save_button = ttk_but(cont_frame, text = 'SAVE', command = lambda user=user, ind=ind, nom=proj_name, 
-                                                      ser=results[0+(7*(i-2))], user_n = user_n, 
-                                                      pas = pass_n: sub_new_row( user, ind, nom, user_n, pas) )
-                                
-                                save_button.grid(row = i, column = j, pady = (0, 20), )
-                                
+                                                                
                                 del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, 
                                                        ser_item = results[0+(7*(i-2))], ser_tab = ind, pro_name = proj_name, 
                                                        use_name = user_n, pass_name = pass_n: del_row_func(pro, ser_tab, ser_item,
                                                                                                            pro_name, use_name, pass_name) )
                                 
-                                del_work_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (25, 20) )
+                                del_work_btn.grid(row = i, column = j, pady = (0, 20), padx = (0, 20) )
                                                                       
                                 list_of_tp.append(results[4+(7*(i-2))])
                                 list_of_ph.append(results[6+(7*(i-2))])
@@ -819,18 +814,12 @@ class Hybrid(tk.Tk):
                             
                             sum_tp = sum(list_of_tp)
                             sum_ph = sum(list_of_ph)
-                            
-                            save_button = ttk_but(cont_frame, text = 'SAVE', command = lambda user=user, ind = ind, 
-                                                  nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: 
-                                                  sub_new_row( user, ind, nom, user_n, pas) )
-                            
-                            save_button.grid(row = i, column = j, pady = (0, 20), )
-                            
+                                                                                    
                             del_work_btn = ttk_but(cont_frame, text = 'DELETE', command = lambda pro = user, ser_item = results[0+(7*(i-2))], ser_tab = ind,
                                                    pro_name = proj_name, use_name = user_n, pass_name = pass_n: del_row_func(pro, ser_tab, 
                                                    ser_item, pro_name, use_name, pass_name) )
                             
-                            del_work_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (25, 20) )
+                            del_work_btn.grid(row = i, column = j, pady = (0, 20), padx = (0, 20) )
                             
                             tk.Label(cont_frame, text='Total Load Required:', font=('Times New Roman', 25, 'bold')).grid(row = i+1, column=0, columnspan=4, sticky='e')
                             tk.Label(cont_frame, text=(sum_tp), font=('Times New Roman', 25, 'bold') ).grid(row = i+1, column = 4, )
@@ -842,11 +831,16 @@ class Hybrid(tk.Tk):
                         
                         back_var.set(13)
                         
+                        save_button = ttk_but(cont_frame, text = 'SAVE', command = lambda user=user, ind=ind, nom=proj_name, 
+                                              user_n = user_n, pas = pass_n: sub_new_row( user, ind, nom, user_n, pas) )
+                        
+                        save_button.grid(row = i+1, column = j-2, pady = (100, 0), padx = (0, 25))
+                        
                         add_row_btn = ttk_but(cont_frame, text = 'ADD ROW', command = lambda user=user, 
                                               ind=ind, nom=proj_name, user_n = user_n, 
                                               pas = pass_n: add_new_row(user, ind, nom, user_n, pas) )
                         
-                        add_row_btn.grid(row = i+1, column=j, pady = (40, 0))
+                        add_row_btn.grid(row = i+1, column=j, pady = (100, 0))
                         
                         cap_lab = tk.Label(cont_frame, text="Capacity of Panels:  ", fg = 'brown', font=('Times New Roman', 18, 'bold') )
                         cap_lab.grid(row=i+2, column=0, pady=(50, 0), sticky='e')
@@ -926,9 +920,11 @@ class Hybrid(tk.Tk):
                         edit_tab.add_command(label ='Re-calibrate', command = lambda a=no_pan_lab, 
                                                         b=inc_wat_lab, c=inc_kva_lab, d=tot_wat_lab, sumey=sum_tp,
                                                         e=tot_load_lab, f=no_bat_lab, g=cco_lab: calib(sumey, a, b, c, d, e, f, g) )
-                        
-                        edit_tab.add_command(label ='', command = None)
                         edit_tab.add_separator()
+                        
+                        edit_tab.add_command(label ='Save Edits', command = lambda user=user, ind=ind, nom=proj_name, 
+                                                                        user_n = user_n, pas = pass_n: 
+                                                                            sub_new_row( user, ind, nom, user_n, pas) )
                         
                         help_tab = tk.Menu(menu_bar, tearoff = 0) 
                         menu_bar.add_cascade(label ='Help', menu = help_tab)
