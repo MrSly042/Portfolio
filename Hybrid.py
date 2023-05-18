@@ -152,19 +152,21 @@ class Hybrid(tk.Tk):
                       VALUES (%s, %s, %s, %s, %s, %s, %s)
                   """
                   
-        row_serial = """ SELECT serial_no from {table_name} 
+        row_serial = """ SELECT serial_no from {table_name}
+                         UNION all
+                         select max(serial_no) from {table_name}
                      """
         
+        del_repl = """  DELETE FROM {table_name} 
+                   """
         upd_date_comp = """ UPDATE projects SET date_completed = %s
                             where project_id = %s and serial_no = %s
                         """
-                        
-        upd_row = """ UPDATE {table_name} SET serial_no = %s, equipment = %s, quantity = %s, 
-                      power = %s, total_power = %s, run_time = %s, power_hour = %s
-                      where serial_no = %s
+                                
+        del_proj = """ DELETE FROM projects WHERE serial_no = %s and project_id = %s
                   """
         
-        del_proj = """ DELETE FROM projects WHERE serial_no = %s and project_id = %s
+        upd_row = """ REPLACE INTO {table_name} VALUES (%s, %s, %s, %s, %s, %s, %s)
                   """
         
         del_sum = """ DROP TABLE {table_name}
@@ -549,10 +551,15 @@ class Hybrid(tk.Tk):
             except query.Error as f:
                 messagebox.showerror('The following error occurred: \n' '{}'.format(f) )
             
-        def add_new_row(cont_frame, user, ind, nom, user_n, pas, row, col, var = '' ):
             
-            entry_var = tk.StringVar()
-            entry_var.set(var)
+        def show_pres_row(cont_frame, row, col, var, state = 0 ):
+            if state == 0:
+                entry_var = tk.IntVar()
+                entry_var.set(var)
+            
+            else:
+                entry_var = tk.StringVar()
+                entry_var.set(var)
             
             key = f'pos_{row}_{col}'
             entry_dict[key] = entry_var
@@ -560,75 +567,104 @@ class Hybrid(tk.Tk):
             entry = tk.Entry(cont_frame, textvariable = entry_var, font=('comic sans ms', 10, 'bold'))
             entry.grid(row = row, column = col, pady = (0, 10), )
             
-            
-        def sub_new_row(ser, user, ind, nom, user_n, pass_n):
-            
-            print([var.get() for var in entry_dict.values()])
-            # try:
-            #     runtime_g = 13
-            #     try:
-            #         quant_g = quant.get()
-            #         power_g = power.get()
-            #         # runtime_g = runtime.get() standard
-                
-            #     except tk.TclError:
-            #         quant_g, power_g, runtime_g = 0,0,0
-                    
-            #     try:
-            #         serial_g = serial.get()
-            #     except tk.TclError:
-            #         raise Exception("Invalid value for Serial No.")
-                
-            #     equip_g = equip.get()
-                
-            #     if not equip_g:
-            #         raise ValueError('Invalid values were entered for equipment')
-                                        
-            #     total_pow = power_g * quant_g
-            #     pow_hr = total_pow * runtime_g
-                    
-            #     try:
-            #         with query.connect(
-            #             host = hostname,
-            #             user = username,
-            #             password = password,
-            #             database = database
-                    
-            #             ) as db:
-            #                 curs = db.cursor()
-                                    
-            #                 tab = 'sum_{0}_{1}'.format(user, ind)
-            #                 restrict_ser = row_serial.format(table_name = tab)
-            #                 curs.execute(restrict_ser)
-                            
-            #                 get_out = curs.fetchall()
-            #                 new = [var for cont in get_out for var in cont]
-                            
-            #                 for var in new:
-            #                     if var == serial_g and var != ser:
-            #                         raise ValueError("Value for Serial no. in existence")
-                            
-            #                 val = (serial_g, equip_g, quant_g, power_g, total_pow, runtime_g, pow_hr) #runtime_g for standard
-            #                 adj_add = add_row.format(table_name = tab)
-            #                 curs.execute(adj_add, val)
+        def add_new_row(user, ind, nom, user_n, pass_n ):
 
-            #                 db.commit()                    
-            #                 curs.close()
+            try:
+                runtime_g = 13
+                quant_g, power_g = 0, 0
+                
+                equip_g = ''
+                                                        
+                total_pow = power_g * quant_g
+                pow_hr = total_pow * runtime_g
+                    
+                try:
+                    with query.connect(
+                        host = hostname,
+                        user = username,
+                        password = password,
+                        database = database
+                    
+                        ) as db:
+                            curs = db.cursor() 
+                                    
+                            tab = 'sum_{0}_{1}'.format(user, ind)
+                            restrict_ser = row_serial.format(table_name = tab)
+                            curs.execute(restrict_ser)
                             
-            #                 open_project(user, ind, nom, user_n, pass_n)
-            
+                            get_out = curs.fetchall()
+                            new = [var for cont in get_out for var in cont]
                             
-            #     except ValueError as v:
-            #         messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(v))
+                            if new[-1] is not None: serial_g = new[-1] + 1
+                            else: serial_g = 1
                             
-            #     except query.Error as r:
-            #         messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(r))
+                            
+                            val = (serial_g, equip_g, quant_g, power_g, total_pow, runtime_g, pow_hr) #runtime_g for standard
+                            adj_add = add_row.format(table_name = tab)
+                            curs.execute(adj_add, val)
+
+                            db.commit()                    
+                            curs.close()
+                            
+                            open_project(user, ind, nom, user_n, pass_n)
             
-            # except Exception as e:
-            #     messagebox.showerror('Error', 'The following error occurred:\n{}'.format(e))
+                except ValueError as v:
+                    messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(v))
+                            
+                except query.Error as r:
+                    messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(r))
             
-            # finally:
-            #     reset(wind)
+            except Exception as e:
+                messagebox.showerror('Error', 'The following error occurred:\n{}'.format(e))
+            
+        def sub_new_row(user, ind, nom, user_n, pass_n):
+            
+            try:
+                entries_list = [var.get() for var in entry_dict.values()]
+                size = len(entries_list)
+                new_tup = []
+                ite = 7
+                for i in range(0, size, 7):
+                    new_tup.append( list(entries_list[i:ite]) )
+                    ite += 7
+
+                for i, var in enumerate(new_tup):
+                    new_tup[i][4] = new_tup[i][3] * new_tup[i][2]
+                    new_tup[i][6] = new_tup[i][5] * new_tup[i][4]
+                                
+                upd_row_new = upd_row.format(table_name = f'sum_{user}_{ind}')
+                del_repl_new = del_repl.format(table_name = f'sum_{user}_{ind}')
+                
+                try:
+                    with query.connect(
+                        host = hostname,
+                        user = username,
+                        password = password,
+                        database = database
+                    
+                        ) as db:
+                            curs = db.cursor()
+                            
+                            curs.execute(del_repl_new)
+                            db.commit()                            
+                            curs.executemany(upd_row_new, new_tup)
+                            
+                            db.commit()                    
+                            curs.close()
+                            
+                            open_project(user, ind, nom, user_n, pass_n)
+                    
+                except ValueError as v:
+                    messagebox.showerror('Error', f'The following error was encountered while saving details:\n{v}')
+                            
+                except query.Error as r:
+                    messagebox.showerror('Error', f'The following error was encountered while saving details:\n{r}')
+            
+            except tk.TclError as t:
+                messagebox.showerror('Error', f'The following value is invalid in its position { str(t).split()[-1] }')
+            
+            except Exception as e:
+                messagebox.showerror('Error', f'The following error occurred:\n{e}')
         
         def calib(sumey, a,b,c,d,e,f,g):
             try:
@@ -651,8 +687,8 @@ class Hybrid(tk.Tk):
             except tk.TclError:
                 messagebox.showerror("Error", 'Invalid values were passed as input!!')
             
-            except Exception as f:
-                messagebox.showerror('Error', '{}'.format(f))
+            except Exception as g:
+                messagebox.showerror('Error', f'{g}')
             
         def open_project(user, ind, proj_name, user_n, pass_n):
             destroy_children()
@@ -716,7 +752,7 @@ class Hybrid(tk.Tk):
                             if count % 7 == 0 and count > 0:
                                 save_button = ttk_but(cont_frame, text = 'SAVE', command = lambda user=user, ind=ind, nom=proj_name, 
                                                       ser=results[0+(7*(i-2))], user_n = user_n, 
-                                                      pas = pass_n: sub_new_row(ser, user, ind, nom, user_n, pas) )
+                                                      pas = pass_n: sub_new_row( user, ind, nom, user_n, pas) )
                                 
                                 save_button.grid(row = i, column = j, pady = (0, 20), )
                                 
@@ -732,11 +768,19 @@ class Hybrid(tk.Tk):
                                 i += 1
                                 j = 0
                             
+                            if j == 1:
+                                show_pres_row(cont_frame, i, j, var, 1)
+                                j += 1
+                                continue
+                            
                             if j == 4:
                                 label = tk.Label(cont_frame, text = var, font=('comic sans ms', 10, 'bold'))
                                 label.grid(row = i, column = j, pady = (0, 10), )
                                 
                                 key = f'pos_{i}_{j}'
+                                entry_var = tk.IntVar()
+                                entry_var.set(var)
+                                
                                 entry_dict[key] = entry_var
                                 j += 1
                                 continue
@@ -746,6 +790,9 @@ class Hybrid(tk.Tk):
                                 label.grid(row = i, column = j, pady = (0, 10), )
                                                                 
                                 key = f'pos_{i}_{j}'
+                                entry_var = tk.IntVar()
+                                entry_var.set(var)
+                                
                                 entry_dict[key] = entry_var
                                 j += 1
                                 continue
@@ -756,11 +803,14 @@ class Hybrid(tk.Tk):
                                 j += 1
                                                                 
                                 key = f'pos_{i}_{j}'
+                                entry_var = tk.IntVar()
+                                entry_var.set(var)
+                                
                                 entry_dict[key] = entry_var
                                 j += 1
                                 continue
                                 
-                            add_new_row(cont_frame, user, ind, proj_name, user_n, pass_n, i, j, var )
+                            show_pres_row(cont_frame, i, j, var )
                             j += 1
                         
                         if results:
@@ -772,7 +822,7 @@ class Hybrid(tk.Tk):
                             
                             save_button = ttk_but(cont_frame, text = 'SAVE', command = lambda user=user, ind = ind, 
                                                   nom=proj_name, ser=results[0+(7*(i-2))], user_n = user_n, pas = pass_n: 
-                                                  sub_new_row(ser, user, ind, nom, user_n, pas) )
+                                                  sub_new_row( user, ind, nom, user_n, pas) )
                             
                             save_button.grid(row = i, column = j, pady = (0, 20), )
                             
@@ -794,7 +844,7 @@ class Hybrid(tk.Tk):
                         
                         add_row_btn = ttk_but(cont_frame, text = 'ADD ROW', command = lambda user=user, 
                                               ind=ind, nom=proj_name, user_n = user_n, 
-                                              pas = pass_n, row = i, col = j: add_new_row(cont_frame, user, ind, nom, user_n, pas, row, col) )
+                                              pas = pass_n: add_new_row(user, ind, nom, user_n, pas) )
                         
                         add_row_btn.grid(row = i+1, column=j, pady = (40, 0))
                         
@@ -871,7 +921,7 @@ class Hybrid(tk.Tk):
                         menu_bar.add_cascade(label = 'Edit', menu = edit_tab)
                         
                         edit_tab.add_command(label ='Add Row', command = lambda user=user, ind=ind, nom=proj_name, user_n = user_n, 
-                                             pas = pass_n: add_new_row(cont_frame, user, ind, nom, user_n, pas, i, j) )
+                                             pas = pass_n: add_new_row(user, ind, nom, user_n, pas ) )
                         
                         edit_tab.add_command(label ='Re-calibrate', command = lambda a=no_pan_lab, 
                                                         b=inc_wat_lab, c=inc_kva_lab, d=tot_wat_lab, sumey=sum_tp,
