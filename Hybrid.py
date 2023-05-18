@@ -360,12 +360,15 @@ class Hybrid(tk.Tk):
                                 canv_pro.configure(scrollregion=canv_pro.bbox('all'))
                         
                         proj_frame.bind("<Configure>", upd_scroll_proj)
+                        
+                        proj_title = tk.Label(proj_frame, text = "PROJECT LIST", font=('Times New Roman', 20, 'bold'), fg='gray')
+                        proj_title.grid(row = 0, column = 0, columnspan = 4, padx=(50,0), pady = (0, 20), sticky='e')
                     
                         for i, var in enumerate(headers):
                             label = tk.Label(proj_frame, text = var, font=('Times New Roman', 18, 'bold') )
-                            label.grid(row = 0, column = i, ipadx=50, pady= (0, 20), )
+                            label.grid(row = 1, column = i, ipadx=50, pady= (0, 20), )
                             
-                        i, j, h = 1, 0, 0
+                        i, j, h = 2, 0, 0
                         for count, var in enumerate(oth):
                             
                             if count % 4 == 0 and count > 0:
@@ -391,7 +394,7 @@ class Hybrid(tk.Tk):
                         
                         if oth:
                             nom = oth[1+(4*h)]
-                            open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i, nom=nom, 
+                            open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i-1, nom=nom, 
                                                   user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n) )
                             
                             open_button.grid(row = i, column = j, pady = (0, 20), )
