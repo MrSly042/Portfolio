@@ -240,36 +240,44 @@ class Hybrid(tk.Tk):
                 messagebox.showerror('Invalid Name', "User name must be at least 3 \ncharacters long and must contain characters!!")
             
             else:                           
-                with query.connect(
-                host = hostname,
-                user = username,
-                password = password,
-                database = database
-            
-                ) as db:
+                try:
                     
-                    char = (name_val, pass_val)
+                    with query.connect(
+                    host = hostname,
+                    user = username,
+                    password = password,
+                    database = database
                 
-                    curs = db.cursor()
-                    
-                    curs.execute(check_present, char[0])
-                    
-                    exist = curs.fetchall()
-                    
-                    if not exist:
-                        curs.execute(keep, char)
-                        db.commit()
-                        curs.close()
+                    ) as db:
                         
-                        messagebox.showinfo("Completed!", 'Credentials have been stored successfully!!!')
-                        login_proj(new_user, name_val, pass_val)
+                        char = (name_val, pass_val)
+                    
+                        curs = db.cursor()
                         
-                    else:
-                        messagebox.showwarning("Existing Username!", 'Username already exists\nPlease select another username!')
-                        curs.close()
+                        curs.execute(check_present, char[0])
+                        
+                        exist = curs.fetchall()
+                        
+                        if not exist:
+                            curs.execute(keep, char)
+                            db.commit()
+                            curs.close()
+                            
+                            messagebox.showinfo("Completed!", 'Credentials have been stored successfully!!!')
+                            login_proj(new_user, name_val, pass_val)
+                            
+                        else:
+                            messagebox.showwarning("Existing Username!", 'Username already exists\nPlease select another username!')
+                            curs.close()
 
-                    reset(new_user)
-                    count += 1
+                        reset(new_user)
+                        count += 1
+                
+                except query.Error as e:
+                    messagebox.showerror('Error','Unable to save credentials!!!\nCheck your internet connection and try again.')
+                
+                except Exception as g:
+                    messagebox.showerror('Error', f'The following error occurred: \n{g}')
 
         def sign_in():
             
@@ -305,112 +313,120 @@ class Hybrid(tk.Tk):
                 reset(login_wind)
             
             destroy_children()
-            with query.connect(
-                host = hostname,
-                user = username,
-                password = password,
-                database = database
-            
-                ) as db:
+            try:
+                
+                with query.connect(
+                    host = hostname,
+                    user = username,
+                    password = password,
+                    database = database
+                
+                    ) as db:
 
-                    values = (name_val, pass_val)
-                    curs = db.cursor()
-                    curs.execute(check_pass, values)
-                    
-                    get_output = curs.fetchall()
-                    
-                    if not get_output:
-                        messagebox.showwarning("INCORRECT CREDENTIALS", "Username or Password is incorrect!")
-                    else:
+                        values = (name_val, pass_val)
+                        curs = db.cursor()
+                        curs.execute(check_pass, values)
                         
-                        ident = (get_output[0][0])
+                        get_output = curs.fetchall()
                         
-                        curs.execute(show_proj, ident)
-                        projects = curs.fetchall()
-                        curs.close()
-                        
-                        new = [var for var in projects]
-                        oth = [var for tup in projects for var in tup]
-                        headers = ['S/N', 'Project Name', 'Date of Audit', 'Date of Completion']
-                        
-                        clear_children()
-                        
-                        frame_pro = tk.Frame(self, )
-                        frame_pro.pack(side='left', fill='both', expand=True)
-                        
-                        canv_pro = tk.Canvas(frame_pro, )
-                        canv_pro.pack(side='top', fill='both', expand=True)
-                        
-                        #scrollabars
-                        proj_scroll_horiz = tk.Scrollbar(frame_pro, orient='horizontal', command=canv_pro.xview)
-                        proj_scroll_horiz.pack(side='bottom', fill='x')
-                                                
-                        proj_scroll_vert = tk.Scrollbar(self, orient='vertical', command=canv_pro.yview)
-                        proj_scroll_vert.pack(side='right', fill='y')
-                        
-                        #configure scrollbars for canvas
-                        canv_pro.config(xscrollcommand=proj_scroll_horiz.set,
-                                         yscrollcommand=proj_scroll_vert.set,
-                                        )
-                        proj_frame = tk.Frame(canv_pro, )
-                        canv_pro.create_window((0,0), window = proj_frame, anchor = 'nw')
-                        
-                        def upd_scroll_proj(event):
-                            if canv_pro.winfo_exists():
-                                canv_pro.configure(scrollregion=canv_pro.bbox('all'))
-                        
-                        proj_frame.bind("<Configure>", upd_scroll_proj)
-                        
-                        proj_title = tk.Label(proj_frame, text = "PROJECT LIST", font=('Times New Roman', 20, 'bold'), fg='gray')
-                        proj_title.grid(row = 0, column = 0, columnspan = 4, padx=(50,0), pady = (0, 20), sticky='e')
-                    
-                        for i, var in enumerate(headers):
-                            label = tk.Label(proj_frame, text = var, font=('Times New Roman', 18, 'bold') )
-                            label.grid(row = 1, column = i, ipadx=50, pady= (0, 20), )
+                        if not get_output:
+                            messagebox.showwarning("INCORRECT CREDENTIALS", "Username or Password is incorrect!")
+                        else:
                             
-                        i, j, h = 2, 0, 0
-                        for count, var in enumerate(oth):
+                            ident = (get_output[0][0])
                             
-                            if count % 4 == 0 and count > 0:
+                            curs.execute(show_proj, ident)
+                            projects = curs.fetchall()
+                            curs.close()
+                            
+                            new = [var for var in projects]
+                            oth = [var for tup in projects for var in tup]
+                            headers = ['S/N', 'Project Name', 'Date of Audit', 'Date of Completion']
+                            
+                            clear_children()
+                            
+                            frame_pro = tk.Frame(self, )
+                            frame_pro.pack(side='left', fill='both', expand=True)
+                            
+                            canv_pro = tk.Canvas(frame_pro, )
+                            canv_pro.pack(side='top', fill='both', expand=True)
+                            
+                            #scrollabars
+                            proj_scroll_horiz = tk.Scrollbar(frame_pro, orient='horizontal', command=canv_pro.xview)
+                            proj_scroll_horiz.pack(side='bottom', fill='x')
+                                                    
+                            proj_scroll_vert = tk.Scrollbar(self, orient='vertical', command=canv_pro.yview)
+                            proj_scroll_vert.pack(side='right', fill='y')
+                            
+                            #configure scrollbars for canvas
+                            canv_pro.config(xscrollcommand=proj_scroll_horiz.set,
+                                            yscrollcommand=proj_scroll_vert.set,
+                                            )
+                            proj_frame = tk.Frame(canv_pro, )
+                            canv_pro.create_window((0,0), window = proj_frame, anchor = 'nw')
+                            
+                            def upd_scroll_proj(event):
+                                if canv_pro.winfo_exists():
+                                    canv_pro.configure(scrollregion=canv_pro.bbox('all'))
+                            
+                            proj_frame.bind("<Configure>", upd_scroll_proj)
+                            
+                            proj_title = tk.Label(proj_frame, text = "PROJECT LIST", font=('Times New Roman', 20, 'bold'), fg='gray')
+                            proj_title.grid(row = 0, column = 0, columnspan = 4, padx=(50,0), pady = (0, 20), sticky='e')
+                        
+                            for i, var in enumerate(headers):
+                                label = tk.Label(proj_frame, text = var, font=('Times New Roman', 18, 'bold') )
+                                label.grid(row = 1, column = i, ipadx=50, pady= (0, 20), )
+                                
+                            i, j, h = 2, 0, 0
+                            for count, var in enumerate(oth):
+                                
+                                if count % 4 == 0 and count > 0:
+                                    nom = oth[1+(4*h)]
+                                    open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, 
+                                                        ind=i , nom=nom, user_n = name_val, pass_n = pass_val: 
+                                                        open_project(user, ind, nom, user_n, pass_n) )
+                                    
+                                    open_button.grid(row = i, column = j, pady = (0, 20), )
+                                    
+                                    del_proj_btn = ttk_but(proj_frame, text = 'DELETE',
+                                                    command = lambda wind = frame_pro, 
+                                                    user = name_val, pass_n = pass_val, 
+                                                    ser = i, pro = user: del_proj_func(wind, user, pass_n, ser, pro) )
+                                    
+                                    i += 1
+                                    j = 0
+                                    h += 1
+                                    
+                                label = tk.Label(proj_frame, text = var, font=('Times New Roman', 18, 'bold') )                            
+                                label.grid(row = i, column = j, pady = (0, 25), )
+                                j += 1
+                            
+                            if oth:
                                 nom = oth[1+(4*h)]
-                                open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, 
-                                                      ind=i , nom=nom, user_n = name_val, pass_n = pass_val: 
-                                                      open_project(user, ind, nom, user_n, pass_n) )
+                                open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i-1, nom=nom, 
+                                                    user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n) )
                                 
                                 open_button.grid(row = i, column = j, pady = (0, 20), )
                                 
                                 del_proj_btn = ttk_but(proj_frame, text = 'DELETE',
-                                                   command = lambda wind = frame_pro, 
-                                                   user = name_val, pass_n = pass_val, 
-                                                   ser = i, pro = user: del_proj_func(wind, user, pass_n, ser, pro) )
+                                                    command = lambda wind = frame_pro, 
+                                                    user = name_val, pass_n = pass_val, 
+                                                    ser = i, pro = ident: del_proj_func(wind, user, pass_n, ser, pro) )
                                 
-                                i += 1
-                                j = 0
-                                h += 1
-                                
-                            label = tk.Label(proj_frame, text = var, font=('Times New Roman', 18, 'bold') )                            
-                            label.grid(row = i, column = j, pady = (0, 25), )
-                            j += 1
+                                del_proj_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (45, 0) )
                         
-                        if oth:
-                            nom = oth[1+(4*h)]
-                            open_button = ttk_but(proj_frame, text = 'OPEN', command = lambda user=ident, ind=i-1, nom=nom, 
-                                                  user_n = name_val, pass_n = pass_val: open_project(user, ind, nom, user_n, pass_n) )
-                            
-                            open_button.grid(row = i, column = j, pady = (0, 20), )
-                            
-                            del_proj_btn = ttk_but(proj_frame, text = 'DELETE',
-                                                   command = lambda wind = frame_pro, 
-                                                   user = name_val, pass_n = pass_val, 
-                                                   ser = i, pro = ident: del_proj_func(wind, user, pass_n, ser, pro) )
-                            
-                            del_proj_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (45, 0) )
-                    
-                        create_new_proj_btn = ttk_but(proj_frame, text = 'NEW', command = lambda ident=ident: create_new_proj(ident, name_val, pass_val) )
-                        create_new_proj_btn.grid(row = i+1, column=j, padx = (150, 0), pady = (40, 0))
+                            create_new_proj_btn = ttk_but(proj_frame, text = 'NEW', command = lambda ident=ident: create_new_proj(ident, name_val, pass_val) )
+                            create_new_proj_btn.grid(row = i+1, column=j, padx = (150, 0), pady = (40, 0))
 
-                        sign_out_btn = ttk_but(proj_frame, text = 'SIGN OUT', command = lambda: (destroy_children(), self.bring_children()) )
-                        sign_out_btn.grid(row = i+1, column = j+1, padx=(50, 0), pady = (40, 0))
+                            sign_out_btn = ttk_but(proj_frame, text = 'SIGN OUT', command = lambda: (destroy_children(), self.bring_children()) )
+                            sign_out_btn.grid(row = i+1, column = j+1, padx=(50, 0), pady = (40, 0))
+            
+            except query.Error as g:
+                messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')    
+            
+            except Exception as e:
+                messagebox.showerror('Error', f'The following error occurred: \n{e}')
                         
         def create_new_proj(ident, nom, passe):
             
@@ -496,7 +512,7 @@ class Hybrid(tk.Tk):
                             login_proj(window, nom, passe)
                     
                 except query.Error as r:
-                    messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(r))
+                    messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')
                     reset(window)
             
             except Exception as r:
@@ -528,7 +544,7 @@ class Hybrid(tk.Tk):
                 login_proj(wind, user, pass_n)
                 
             except query.Error as e:
-                messagebox.showerror('The following error occurred: \n' '{}'.format(e) )
+                messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')
         
         def del_row_func(pro, ser_tab, ser_item, proj_name, user_n, pass_n, row):
             try:
@@ -555,7 +571,7 @@ class Hybrid(tk.Tk):
                 open_project(pro, ser_tab, proj_name, user_n, pass_n)
             
             except query.Error as f:
-                messagebox.showerror('The following error occurred: \n' '{}'.format(f) )
+                messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')
             
             
         def show_pres_row(cont_frame, row, col, var, state = 0 ):
@@ -618,7 +634,7 @@ class Hybrid(tk.Tk):
                     messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(v))
                             
                 except query.Error as r:
-                    messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(r))
+                    messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')
             
             except Exception as e:
                 messagebox.showerror('Error', 'The following error occurred:\n{}'.format(e))
@@ -664,7 +680,7 @@ class Hybrid(tk.Tk):
                     messagebox.showerror('Error', f'The following error was encountered while saving details:\n{v}')
                             
                 except query.Error as r:
-                    messagebox.showerror('Error', f'The following error was encountered while saving details:\n{r}')
+                    messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')
             
             except tk.TclError as t:
                 messagebox.showerror('Error', f'The following value is invalid in its position { str(t).split()[-1] }')
@@ -945,7 +961,7 @@ class Hybrid(tk.Tk):
                         self.config(menu = menu_bar)
                         
             except query.Error as r:
-                messagebox.showerror('Error', 'The following error was encountered while getting details:\n{}'.format(r))
+                messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')
         
         #set focus to follow mouse
         self.tk_focusFollowsMouse()
