@@ -388,8 +388,10 @@ class Hybrid(tk.Tk):
                                     
                                     del_proj_btn = ttk_but(proj_frame, text = 'DELETE',
                                                     command = lambda wind = frame_pro, 
-                                                    user = name_val, pass_n = pass_val, 
-                                                    ser = i, pro = user: del_proj_func(wind, user, pass_n, ser, pro) )
+                                                    user_n = name_val, pass_n = pass_val, 
+                                                    ser = i, pro = ident: del_proj_func(wind, user_n, pass_n, ser, pro) )
+                                    
+                                    del_proj_btn.grid(row = i, column = j+1, pady = (0, 20))
                                     
                                     i += 1
                                     j = 0
@@ -411,7 +413,7 @@ class Hybrid(tk.Tk):
                                                     user = name_val, pass_n = pass_val, 
                                                     ser = i, pro = ident: del_proj_func(wind, user, pass_n, ser, pro) )
                                 
-                                del_proj_btn.grid(row = i, column = j+1, pady = (0, 20), padx = (45, 0) )
+                                del_proj_btn.grid(row = i, column = j+1, pady = (0, 20),  )
                         
                             create_new_proj_btn = ttk_but(proj_frame, text = 'NEW', command = lambda ident=ident: create_new_proj(ident, name_val, pass_val) )
                             create_new_proj_btn.grid(row = i+1, column=j, padx = (150, 0), pady = (40, 0))
@@ -422,8 +424,8 @@ class Hybrid(tk.Tk):
             except query.Error as g:
                 messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')    
             
-            except Exception as e:
-                messagebox.showerror('Error', f'The following error occurred: \n{e}')
+            # except Exception as e:
+            #     messagebox.showerror('Error', f'The following error occurred: \n{e}')
                         
         def create_new_proj(ident, nom, passe):
             
