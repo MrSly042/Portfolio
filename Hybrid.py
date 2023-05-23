@@ -95,7 +95,6 @@ class Hybrid(tk.Tk):
     def create_widgets(self):
         
         icon = ImageTk.PhotoImage(file="CHEBBY ENERGY.png")
-        self.user = tk.PhotoImage(file='user.png')
                 
         name, pass_w, confirm = tk.StringVar(), tk.StringVar(), tk.StringVar()
         serial, equip, quant = tk.IntVar(), tk.StringVar(), tk.IntVar()
@@ -386,12 +385,15 @@ class Hybrid(tk.Tk):
                                     
                                     open_button.grid(row = i, column = j, pady = (0, 20), )
                                     
+                                    upd_proj_btn = ttk_but(proj_frame, text = "UPDATE", command = recover)
+                                    upd_proj_btn.grid(row = i, column = j+1, pady = (0, 20), sticky = 'w')
+                                    
                                     del_proj_btn = ttk_but(proj_frame, text = 'DELETE',
                                                     command = lambda wind = frame_pro, 
                                                     user_n = name_val, pass_n = pass_val, 
-                                                    ser = i, pro = ident: del_proj_func(wind, user_n, pass_n, ser, pro) )
+                                                    ser = i-1, pro = ident: del_proj_func(wind, user_n, pass_n, ser, pro) )
                                     
-                                    del_proj_btn.grid(row = i, column = j+1, pady = (0, 20))
+                                    del_proj_btn.grid(row = i, column = j+2, pady = (0, 20))
                                     
                                     i += 1
                                     j = 0
@@ -408,12 +410,15 @@ class Hybrid(tk.Tk):
                                 
                                 open_button.grid(row = i, column = j, pady = (0, 20), )
                                 
+                                upd_proj_btn = ttk_but(proj_frame, text = "UPDATE", command = recover)
+                                upd_proj_btn.grid(row = i, column = j+1, pady = (0, 20), sticky = 'w')
+                                
                                 del_proj_btn = ttk_but(proj_frame, text = 'DELETE',
                                                     command = lambda wind = frame_pro, 
                                                     user = name_val, pass_n = pass_val, 
-                                                    ser = i, pro = ident: del_proj_func(wind, user, pass_n, ser, pro) )
+                                                    ser = i-1, pro = ident: del_proj_func(wind, user, pass_n, ser, pro) )
                                 
-                                del_proj_btn.grid(row = i, column = j+1, pady = (0, 20),  )
+                                del_proj_btn.grid(row = i, column = j+2, pady = (0, 20),  )
                         
                             create_new_proj_btn = ttk_but(proj_frame, text = 'NEW', command = lambda ident=ident: create_new_proj(ident, name_val, pass_val) )
                             create_new_proj_btn.grid(row = i+1, column=j, padx = (150, 0), pady = (40, 0))
@@ -471,6 +476,9 @@ class Hybrid(tk.Tk):
                 if not proj_comple:
                     proj_comple = None
                 
+                if not proj_name:
+                    raise Exception("Project Name cannot be null!!")
+                
                 if len(proj_name) > 15:
                     proj_name = proj_name[:12] + '\n' + proj_name[12:]
                 
@@ -511,11 +519,15 @@ class Hybrid(tk.Tk):
                             login_proj(window, nom, passe)
                     
                 except query.Error as r:
-                    messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')
                     reset(window)
-            
+                    err = str(r).split()[1:5]
+                    err = ' '.join(err)
+                    
+                    if err == "\"Can't connect to MySQL": err = "Unable to load Projects!!!\nCheck your internet connection and try again."
+                    messagebox.showerror('Error', f'{err}')
+                    
             except Exception as r:
-                messagebox.showerror('Too many characters', '{}'.format(r))
+                messagebox.showerror('Error', f'An error occurred:\n{r}')
                 reset(window)
             
         def del_proj_func(wind, user, pass_n, ser_no, pro_id):
