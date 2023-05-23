@@ -429,8 +429,8 @@ class Hybrid(tk.Tk):
             except query.Error as g:
                 messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')    
             
-            # except Exception as e:
-            #     messagebox.showerror('Error', f'The following error occurred: \n{e}')
+            except Exception as e:
+                messagebox.showerror('Error', f'The following error occurred: \n{e}')
                         
         def create_new_proj(ident, nom, passe):
             
@@ -508,7 +508,7 @@ class Hybrid(tk.Tk):
                             curs.execute(add_proj, val)
                             db.commit()
                             
-                            concat = 'sum_{0}_{1}'.format(ident, new_val)
+                            concat = f'sum_{ident}_{new_val}'
                             table = create_sum_tab.format(table_name = concat)
                             
                             curs.execute(table)
@@ -534,7 +534,7 @@ class Hybrid(tk.Tk):
             try:
 
                 val = (ser_no, pro_id)
-                nom = 'sum_{}_{}'.format(pro_id, ser_no)
+                nom = f'sum_{pro_id}_{ser_no}'
                 del_sum_new = del_sum.format(table_name = nom)
                 
                 with query.connect(
@@ -563,7 +563,7 @@ class Hybrid(tk.Tk):
                 for i in range(7):
                     entry_dict.pop(f'pos_{row}_{i}')
                 
-                nom = 'sum_{}_{}'.format(pro, ser_tab)
+                nom = f'sum_{pro}_{ser_tab}'
                 del_row_new = del_row.format(table_name = nom)
                 
                 with query.connect(
@@ -621,7 +621,7 @@ class Hybrid(tk.Tk):
                         ) as db:
                             curs = db.cursor() 
                                     
-                            tab = 'sum_{0}_{1}'.format(user, ind)
+                            tab = f'sum_{user}_{ind}'
                             restrict_ser = row_serial.format(table_name = tab)
                             curs.execute(restrict_ser)
                             
@@ -642,13 +642,13 @@ class Hybrid(tk.Tk):
                             open_project(user, ind, nom, user_n, pass_n)
             
                 except ValueError as v:
-                    messagebox.showerror('Error', 'The following error was encountered while saving details:\n{}'.format(v))
+                    messagebox.showerror('Error', f'The following error was encountered while saving details:\n{v}') 
                             
                 except query.Error as r:
-                    messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')
+                    messagebox.showerror('Error', 'Unable to load Projects!!!\nCheck your internet connection and try again.')
             
             except Exception as e:
-                messagebox.showerror('Error', 'The following error occurred:\n{}'.format(e))
+                messagebox.showerror('Error', f'The following error occurred:\n{e}')
             
         def sub_new_row(user, ind, nom, user_n, pass_n):
             
@@ -760,13 +760,14 @@ class Hybrid(tk.Tk):
                 TWA = Ans * capan.get()
                 no_batt = (back_var.get() * sumey) / (bat_vol.get() * amp_hrs.get() * 0.8)
                                                     
-                a.config(text=('No. of panels   =   {}'.format(Ans) ) )
-                b.config(text=('Inverter Capacity(KW)   =   {}'.format( round(Inv_cap/1000, 3) ) ) )
-                c.config(text=('Inverter Capacity(KVA)   =   {}'.format( round( (Inv_cap/0.8 )/1000, 3)) ) )
-                d.config(text=('Total Wattage of Array(W)   =   {}'.format( round(TWA, 3) ) ) )
-                e.config(text=('Total Load that works overnight   =   {}'.format(sumey) ) )
-                f.config(text=('No. of Batteries   =   {}'.format(round(no_batt, 3)) ) )
-                g.config(text=('Charge Controller Output(amps)   =   {}'.format( round(TWA/no_batt + 20, 3) ) ) ) 
+                a.config(text = f'No. of panels   =   {Ans}' )
+                b.config(text= f'Inverter Capacity(KW)   =   {round(Inv_cap/1000, 3)}')
+                c.config(text= f'Inverter Capacity(KVA)   =   {round( (Inv_cap/0.8 )/1000, 3)}' )
+                d.config(text= f'Total Wattage of Array(W)   =   {round(TWA, 3)}' )
+                
+                e.config(text= f'Total Load that works overnight   =   {sumey}' )
+                f.config(text= f'No. of Batteries   =   {round(no_batt, 3)}' )
+                g.config(text= f'Charge Controller Output(amps)   =   {round(TWA/no_batt + 20, 3)}' ) 
             
             except tk.TclError:
                 messagebox.showerror("Error", 'Invalid values were passed as input!!')
@@ -787,7 +788,7 @@ class Hybrid(tk.Tk):
                     ) as db:
                         curs = db.cursor()
                         
-                        table = 'sum_{0}_{1}'.format(user, ind)
+                        table = f'sum_{user}_{ind}'
                         val = open_proj.format(table_name = table)
                         curs.execute(val)
                         
@@ -957,7 +958,7 @@ class Hybrid(tk.Tk):
                         tot_load_lab = tk.Label(cont_frame, text='Total Load that works overnight   =   0', fg = 'brown', font=('Times New Roman', 18, 'bold') )
                         tot_load_lab.grid(row=i+4, column=3, columnspan=2, pady=(50, 0), sticky='w')
                         
-                        calc_lab = tk.Label(cont_frame, text=('Backup Time   =   {}'.format(back_var.get())), fg = 'brown', font=('Times New Roman', 18, 'bold') )
+                        calc_lab = tk.Label(cont_frame, text= f'Backup Time   =   {back_var.get()}', fg = 'brown', font=('Times New Roman', 18, 'bold') )
                         calc_lab.grid(row=i+4, column=6, columnspan=2, pady=(50, 0), sticky='w')
                         
                         amp_hr_lab = tk.Label(cont_frame, text='Amp Hours:', fg = 'brown', font=('Times New Roman', 18, 'bold') )
