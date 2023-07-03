@@ -304,6 +304,29 @@ class Hybrid(tk.Tk):
             submit_login_btn.grid(row=3, column=2, pady=(40, 0) )
                 
         def login_proj(login_wind, name_val, pass_val):
+
+            def on_left_key_press(event):
+                if canv_pro.winfo_exists() and canv_pro.focus_displayof():
+                    canv_pro.xview_scroll(-1, "units")
+
+            def on_right_key_press(event):
+                if canv_pro.winfo_exists() and canv_pro.focus_displayof():
+                    canv_pro.xview_scroll(1, "units")
+
+            def on_up_key_press(event):
+                if canv_pro.winfo_exists():                    
+                    canv_pro.yview_scroll(-1, "units")
+
+            def on_down_key_press(event):
+                if canv_pro.winfo_exists():
+                    canv_pro.yview_scroll(1, "units")
+
+            def on_mouse_wheel(event):
+                if canv_pro.winfo_exists():
+                    if event.state & 0x01:
+                        canv_pro.xview_scroll(-event.delta, "units")
+                    else:
+                        canv_pro.yview_scroll(-event.delta, "units")
             
             if login_wind.winfo_exists():
                 reset(login_wind)
@@ -334,8 +357,7 @@ class Hybrid(tk.Tk):
                             curs.execute(show_proj, ident)
                             projects = curs.fetchall()
                             curs.close()
-                            
-                            new = [var for var in projects]
+                                                        
                             oth = [var for tup in projects for var in tup]
                             headers = ['S/N', 'Project Name', 'Date of Audit', 'Date of Completion']
                             
@@ -359,16 +381,22 @@ class Hybrid(tk.Tk):
                                             yscrollcommand=proj_scroll_vert.set,
                                             )
                             proj_frame = tk.Frame(canv_pro, )
-                            canv_pro.create_window((0,0), window = proj_frame, anchor = 'nw')
+                            canv_pro.create_window((0,0), window = proj_frame, anchor = 'n')
                             
                             def upd_scroll_proj(event):
                                 if canv_pro.winfo_exists():
                                     canv_pro.configure(scrollregion=canv_pro.bbox('all'))
                             
                             proj_frame.bind("<Configure>", upd_scroll_proj)
-                            
+                                                                                    
+                            self.bind("<Left>", on_left_key_press)
+                            self.bind("<Right>", on_right_key_press)
+                            self.bind("<Up>", on_up_key_press)
+                            self.bind("<Down>", on_down_key_press)
+                            self.bind("<MouseWheel>", on_mouse_wheel)
+
                             proj_title = tk.Label(proj_frame, text = "PROJECT LIST", font=('Times New Roman', 20, 'bold'), fg='gray')
-                            proj_title.grid(row = 0, column = 0, columnspan = 4, padx=(50,0), pady = (0, 20), sticky='e')
+                            proj_title.grid(row = 0, column = 0, columnspan = 4, padx=(50,0), sticky='e')
                         
                             for i, var in enumerate(headers):
                                 label = tk.Label(proj_frame, text = var, font=('Times New Roman', 18, 'bold') )
@@ -777,7 +805,30 @@ class Hybrid(tk.Tk):
             
         def open_project(user, ind, proj_name, user_n, pass_n):
             destroy_children()
-                        
+
+            def on_left_key_press(event):
+                if show_canv.winfo_exists() and show_canv.focus_displayof():
+                    show_canv.xview_scroll(-1, "units")
+
+            def on_right_key_press(event):
+                if show_canv.winfo_exists() and show_canv.focus_displayof():
+                    show_canv.xview_scroll(1, "units")
+
+            def on_up_key_press(event):
+                if show_canv.winfo_exists():
+                    show_canv.yview_scroll(-1, "units")
+
+            def on_down_key_press(event):
+                if show_canv.winfo_exists():
+                    show_canv.yview_scroll(1, "units")
+
+            def on_mouse_wheel(event):
+                if show_canv.winfo_exists():
+                    if event.state & 0x01:
+                        show_canv.xview_scroll(-event.delta, "units")
+                    else:
+                        show_canv.yview_scroll(-event.delta, "units")
+                                                    
             try:
                 with query.connect(
                     host = hostname,
@@ -795,7 +846,7 @@ class Hybrid(tk.Tk):
                         shown = curs.fetchall()
                         results = [var for tup in shown for var in tup]
                         
-                        headings = ['Serial No.', 'Equipment', 'Quantity', 'Power', 'Total Power', 'Run Time', 'Power Hour']
+                        headings = ['Serial No.', 'Equipment', 'Quantity', 'Power', 'Total Power', 'Run Time', 'Watt Hour']
                         list_of_tp = []
                         list_of_ph = []
                         
@@ -824,6 +875,13 @@ class Hybrid(tk.Tk):
                                 show_canv.configure(scrollregion=show_canv.bbox('all'))
                         
                         cont_frame.bind("<Configure>", change_show)
+                                                
+                        self.bind("<Left>", on_left_key_press)
+                        self.bind("<Right>", on_right_key_press)
+                        self.bind("<Up>", on_up_key_press)
+                        self.bind("<Down>", on_down_key_press)
+                        self.bind("<MouseWheel>", on_mouse_wheel)
+
 
                         tk.Label(cont_frame, text = proj_name, font=('Times New Roman', 20, 'bold'), fg='gray').grid(row = 0, column = 0, columnspan = 4, padx=(50,0) ,sticky='e')
                         
