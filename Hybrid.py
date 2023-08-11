@@ -1089,7 +1089,7 @@ class Hybrid(tk.Tk):
                 messagebox.showerror('Error','Unable to load Projects!!!\nCheck your internet connection and try again.')
         
         #set focus to follow mouse
-        self.tk_focusFollowsMouse()
+        #self.tk_focusFollowsMouse()
         
         #login screen details
         sign_in_btn = ttk_but(self, text="Sign In", command=sign_in)
